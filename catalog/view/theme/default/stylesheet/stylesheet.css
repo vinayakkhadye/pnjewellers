@@ -627,7 +627,7 @@ h2.price {
 	width: 20%;
 	border: none;
 	display: inline-block;
-	float: left;
+	/* float: left; */
 	background-color: #eee;
 	color: #888;
 	line-height: 38px;
