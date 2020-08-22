@@ -1,0 +1,122 @@
+{# [UPI-Payment] is a Payment Module to Integrate#}
+{# UPI - [ Unified Payments Interface ] A Service From NPCI - [ National Payments Corporation Of India ]#}
+{# as a Payment Gateway Method in OPENCART - 3.0.2.0 - 3.0.3.0 - 3.0.3.1  - 3.0.3.2 #}
+
+{# Developed By: #}
+{# Mr. TARAKESHWAR GAJAM #}
+{# ABCD PAYMENT SERVICES, #4-1-71/416, Sai Durga Gardens, Nacharam Main Road, Medchal-Malkajgiri District, Telangana State - 500076, India. #}
+{# URL: https://www.abcd-pay.com , E-Mail : admin@abcd-pay.com, Mobile : 0091-0-8106877688. #}
+
+{# File Path = "catalog/view/theme/default/template/checkout/upipaymentshow.twig" #}
+
+{{ header }}
+<div id="checkout-upipaymentshow" class="container">
+  <div class="row">
+    {{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">
+        {{ content_top }}
+        <div class="well well-sm" id="divupipaymentcomment" name="divupipaymentcomment"  style="width: 100%; border: 0;font-weight: bold">
+        <table style="border: 0">
+            <tr>
+                <td>{{ upipaymentcomment }}{{ text_upi_payment }}&nbsp&nbsp</td>
+                <td id="countdowntimer" name="countdowntimer"></td>
+            </tr>
+        </table>
+        </div>
+        <div class="table-responsive" id="divupiqrimageurl" name="divupiqrimageurl" style="width: 100%; border: 0">
+        <table class="table table-bordered table-hover" style="border: 0;width: 100%;vertical-align: middle">
+            <thead>
+            </thead>
+            <tbody align="left" style="border: 0;">
+            <tr>
+                <td style="border: 0" >
+                    <img id="upiqrimageurl" name="upiqrimageurl" src="{{ upiqrimageurl }}">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="well well-sm" id="divupipaynote" name="divupipaynote" style="width: 100%; border: 0">
+        <table class="table table-bordered table-hover" style="border: 0;width: 100%;vertical-align: middle">
+            <thead>
+            </thead>
+            <tbody align="left" style="border: 0;">
+                <tr style="border: 0;">
+                    <td style="border: 0;" id="textemail" name="textemail">
+                        {{ text_upi_email }}
+                    </td>
+                </tr>
+                <tr style="border: 0;">
+                    <td style="border: 0;" id="customeremail" name="customeremail">
+                        {{ customeremail }}
+                    </td>
+                </tr>
+                <tr style="border: 0;">
+                    <td style="border: 0;" id="textpaymentnote" name="textpaymentnote">
+                        {{ text_payment_note }}
+                    </td>
+                </tr>
+                <tr style="border: 0;">
+                    <td style="border: 0;" id="textpaymentinfo" name="textpaymentinfo">
+                        {{ text_payment_info }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+{{ footer }}
+<script type="text/javascript">
+    var orderid = '{{ orderid }}';
+    var timeout = '{{ timeout }}'*60000;
+    setTimeout(function() {
+        location='{{ successpage }}'
+    }, timeout);
+    var timeleft = (timeout/1000);
+    var timeinterval = 15;
+    var maxcount = (timeleft/timeinterval);
+    var orderstatusTimer = setInterval(function(){
+        document.getElementById("countdowntimer").innerHTML = ("0"+(Math.floor(timeleft/60))).substr(-2)+':'+("0"+(Math.floor(timeleft%60))).substr(-2);
+        timeleft -= 1;
+        for(i=1;i<maxcount;i++){
+            if((i*timeinterval) === timeleft){
+                $.ajax({
+                    type: "POST",
+                    url: 'index.php?route=checkout/upipayment/orderstatus',
+                    data:{"orderid":orderid},
+                    dataType: 'json',
+                    beforeSend: function() {
+                    },
+                    complete: function() {
+                    },
+                    success: function(json) {
+                            if (json['redirect']) {
+                                clearInterval(orderstatusTimer);
+                                document.getElementById("countdowntimer").innerHTML = "E-Mail Sent";
+                                location = json['redirect'];
+                            }
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                            location = 'index.php?route=checkout/success';
+                    }
+                });
+            }
+        }
+        if(timeleft <= 0){
+            clearInterval(orderstatusTimer);
+            document.getElementById("countdowntimer").innerHTML = "E-Mail Sent"
+        }
+    }, 1000);
+</script>

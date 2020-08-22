@@ -1,0 +1,194 @@
+<div id="SMSAlertCheckOTPModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Verification OTP</h4>
+      </div>
+      <div class="modal-body">
+        <input type="text" name="smsalert_otp_code" placeholder="Enter OTP" id="smsalert_otp_code" class="form-control" autocomplete="off" />
+			<br/>
+			<button type="button" class="btn btn-default" id="smsalert_resend_btn">Resend</button>
+			<span id="timer"></span>
+			
+			<input type="button" id="smsalert_otp_checkout_verify_button" value="Validate OTP" class="btn btn-primary pull-right" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	$('#button-payment-method').unbind('click').bind('click', function() {
+		var pay_method=$('[name="payment_method"]:checked').val();
+		var enable_pay_method = '{{enabled_payment_methods}}';
+		
+		if(enable_pay_method!='' && enable_pay_method.split(',').length > 0)
+		{
+			$(document).undelegate( '#button-payment-method', "click");
+			$('#SMSAlertCheckOTPModal').modal('show');
+			sendOTPForCheckout();
+			return false;
+		}
+		
+		procceedCheckoutConfirm();
+		
+	});
+	
+	$('#smsalert_otp_checkout_verify_button').click(function(){
+		verifyOTP();
+	});
+	
+	$('#smsalert_resend_btn').click(function(){
+		sendOTPForCheckout();
+		return false;
+	});
+});
+
+
+
+function timerCount()
+{
+	var resend_timer = '{{resend_timer}}';
+	var timer = function(secs){
+		var sec_num = parseInt(secs, 10);
+		var hours   = Math.floor(sec_num / 3600) % 24;
+		var minutes = Math.floor(sec_num / 60) % 60;
+		var seconds = sec_num % 60;
+		hours = hours < 10 ? "0" + hours : hours;
+		minutes = minutes < 10 ? "0" + minutes : minutes;
+		seconds = seconds < 10 ? "0" + seconds : seconds;
+		return [hours,minutes,seconds].join(":")
+	};
+	document.getElementById("timer").style.display = "inline";
+	document.getElementById("timer").innerHTML = timer(resend_timer)+" sec";
+	var counter = resend_timer;
+	 interval = setInterval(function() {
+		counter--;
+		 var places = (counter < 10 ? "0" : "");
+		document.getElementById("timer").innerHTML = timer(counter)+ " sec";
+		if (counter == 0) {
+			document.getElementById("timer").style.display = "none";
+			var cssString = "pointer-events: auto; cursor: pointer; opacity: 1;"; 
+			document.getElementById("smsalert_resend_btn").style.cssText = cssString;
+			clearInterval(interval);
+		}
+		else
+		{
+			document.getElementById("smsalert_resend_btn").style.cssText = "pointer-events: none; cursor: default; opacity: 1;";
+		}
+	}, 1000);
+}
+
+function verifyOTP()
+{
+	
+	$('.alert-dismissible, .text-danger').remove();
+	var code = $('#smsalert_otp_code').val();
+	if(code=='')
+	{
+		$('#SMSAlertCheckOTPModal .modal-body').prepend( '<div class="alert alert-danger alert-dismissible"><strong>{{blank_otp}}</strong></div>' );
+		return false;
+	}
+	
+	$.ajax({
+        url: 'index.php?route=extension/module/smsalert&otp_event=verify',
+        type: 'post',
+        data: {'code': code},
+        dataType: 'json',
+        success: function(json) {
+			if(json['status']=='success' && json['description']['desc']=='Code Matched successfully.')
+			{
+				$('#SMSAlertCheckOTPModal .modal-body').prepend( '<div class="alert alert-success alert-dismissible"><strong>'+json['description']['desc']+'</strong></div>' );
+				procceedCheckoutConfirm();
+				$('#SMSAlertCheckOTPModal').modal('hide');
+				
+			}
+			else
+			{
+				$('#SMSAlertCheckOTPModal .modal-body').prepend( '<div class="alert alert-danger alert-dismissible"><strong>'+json['description']['desc']+'</strong></div>' );
+			}
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+}
+
+function sendOTPForCheckout()
+{
+	$.ajax({
+        url: 'index.php?route=extension/module/smsalert&otp_event=checkout',
+        type: 'post',
+       dataType: 'json',
+        success: function(json) {
+			$('.alert-dismissible, .text-danger').remove();
+			if(json['status']=='success')
+			{
+				$('#SMSAlertCheckOTPModal .modal-body').prepend( '<div class="alert alert-success alert-dismissible"><strong>Success! OTP sent Successfully to '+json['telephone']+'</strong> .</div>' );
+				timerCount();
+			}
+			else
+			{
+				$('#SMSAlertCheckOTPModal .modal-body').prepend( '<div class="alert alert-danger alert-dismissible"><strong>Error! OTP sent Failed</strong> .</div>' );
+			}
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+	
+	
+}
+
+
+function procceedCheckoutConfirm()
+{
+	$.ajax({
+		url: 'index.php?route=checkout/payment_method/save',
+		type: 'post',
+		data: $('#collapse-payment-method input[type=\'radio\']:checked, #collapse-payment-method input[type=\'checkbox\']:checked, #collapse-payment-method textarea'),
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-payment-method').button('loading');
+		},
+		success: function(json) {
+			$('.alert-dismissible, .text-danger').remove();
+
+			if (json['redirect']) {
+				location = json['redirect'];
+			} else if (json['error']) {
+				$('#button-payment-method').button('reset');
+				
+				if (json['error']['warning']) {
+					$('#collapse-payment-method .panel-body').prepend('<div class="alert alert-danger alert-dismissible">' + json['error']['warning'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				}
+			} else {
+				$.ajax({
+					url: 'index.php?route=checkout/confirm',
+					dataType: 'html',
+					complete: function() {
+						$('#button-payment-method').button('reset');
+					},
+					success: function(html) {
+						$('#collapse-checkout-confirm .panel-body').html(html);
+						
+						$('#collapse-checkout-confirm').parent().find('.panel-heading .panel-title').html('<a href="#collapse-checkout-confirm" data-toggle="collapse" data-parent="#accordion" class="accordion-toggle">{{ text_checkout_confirm }} <i class="fa fa-caret-down"></i></a>');
+
+						$('a[href=\'#collapse-checkout-confirm\']').trigger('click');
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+	
+}
+//--></script>

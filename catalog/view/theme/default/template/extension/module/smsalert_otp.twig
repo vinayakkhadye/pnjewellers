@@ -1,0 +1,83 @@
+{{ header }}
+<div class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %} 
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %} 
+  </ul>
+  {% if success %} 
+  <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}</div>
+  {% endif %} 
+  {% if error_warning %} 
+  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+  {% endif %} 
+  <div class="row">{{ column_left }} 
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">{{ content_top }}
+      <h1>{{ heading_title }}</h1>
+      <form action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+        <fieldset>
+          <div class="form-group required">
+            <div class="col-md-offset-3 col-md-6">
+			  <label for="input-code"><b>{{ entry_otp }}</b></label><br />
+              <input type="text" name="code" placeholder="{{ entry_otp }}" id="input-code" class="form-control" autocomplete="off" />
+			  {% for key,value in data %}
+			  
+			  <input type="hidden" name="{{ key }}" value="{{ value }}" class="form-control" />
+			   {% endfor %}
+            </div>
+          </div>
+        </fieldset>
+        <div class="buttons clearfix">
+          <div class="pull-left"><a href="{{ resend }}" class="btn btn-default" id="smsalert_resend_btn">{{ button_resend }}</a> <span id="timer"></span></div>
+          <div class="pull-right">
+            <input type="submit" value="{{ button_continue }}" class="btn btn-primary" />
+          </div>
+        </div>
+      </form>
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+<script type="text/javascript"><!--
+timerCount();
+function timerCount()
+{
+	var resend_timer = parseInt('{{resend_timer}}');
+	var timer = function(secs){
+		var sec_num = parseInt(secs, 10);
+		var hours   = Math.floor(sec_num / 3600) % 24;
+		var minutes = Math.floor(sec_num / 60) % 60;
+		var seconds = sec_num % 60;
+		hours = hours < 10 ? "0" + hours : hours;
+		minutes = minutes < 10 ? "0" + minutes : minutes;
+		seconds = seconds < 10 ? "0" + seconds : seconds;
+		return [hours,minutes,seconds].join(":")
+	};
+	document.getElementById("timer").style.display = "inline";
+	document.getElementById("timer").innerHTML = timer(resend_timer)+" sec";
+	var counter = resend_timer;
+	 interval = setInterval(function() {
+		counter--;
+		 var places = (counter < 10 ? "0" : "");
+		document.getElementById("timer").innerHTML = timer(counter)+ " sec";
+		if (counter == 0) {
+			document.getElementById("timer").style.display = "none";
+			var cssString = "pointer-events: auto; cursor: pointer; opacity: 1;"; 
+			document.getElementById("smsalert_resend_btn").style.cssText = cssString;
+			clearInterval(interval);
+		}
+		else
+		{
+			document.getElementById("smsalert_resend_btn").style.cssText = "pointer-events: none; cursor: default; opacity: 1;";
+		}
+	}, 1000);
+}
+//--></script>
+
+{{ footer }}

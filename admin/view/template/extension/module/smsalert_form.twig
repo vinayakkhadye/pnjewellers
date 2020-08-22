@@ -1,0 +1,400 @@
+{{ header }} {{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %} 
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %} 
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %} 
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %} 
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+		  <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+          </ul>
+		  <div class="tab-content">
+            <div class="tab-pane active" id="tab-general">
+			<div class="form-group">
+                <label class="col-sm-2 control-label" for="input-name">Status</label>
+				<div class="col-sm-10">
+				  <input type="checkbox" name="status" id="status" class="form-control" {{status=='1' ? 'checked' : '' }} />
+				</div>
+			  </div>
+			  <div class="form-group required">
+                <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+				<div class="col-sm-10">
+				  <input type="text" name="name" value="{{ name }}" id="input-name" class="form-control" />
+				</div>
+			  </div>
+			  <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-type">{{ entry_type }}</label>
+				<div class="col-sm-10">
+				  <select name="type" id="input-type" class="form-control">
+					{% if type == 'register' %}
+					<option value="register" selected="selected">{{ text_register }}</option>
+					{% else %}   
+					<option value="register">{{ text_register }}</option>
+					{% endif %}
+					{% if type == 'affiliate' %} 
+					<option value="affiliate" selected="selected">{{ text_affiliate }}</option>
+					{% else %}   
+					<option value="affiliate">{{ text_affiliate }}</option>
+					{% endif %}
+					{% if type == 'order' %} 
+					<option value="order" selected="selected">{{ text_order }}</option>
+					{% else %}   
+					<option value="order">{{ text_order }}</option>
+					{% endif %}
+					{% if type == 'forgotten' %} 
+					<option value="forgotten" selected="selected">{{ text_forgotten }}</option>
+					{% else %}   
+					<option value="forgotten">{{ text_forgotten }}</option>
+					{% endif %}
+					{% if type == 'reward' %} 
+					<option value="reward" selected="selected">{{ text_reward }}</option>
+					{% else %}   
+					<option value="reward">{{ text_reward }}</option>
+					{% endif %}
+					{% if type == 'account_approve' %} 
+					<option value="account_approve" selected="selected">{{ text_account_approve }}</option>
+					{% else %}  
+					<option value="account_approve">{{ text_account_approve }}</option>
+					{% endif %}
+					{% if type == 'account_transaction' %} 
+					<option value="account_transaction" selected="selected">{{ text_account_transaction }}</option>
+					{% else %}   
+					<option value="account_transaction">{{ text_account_transaction }}</option>
+					{% endif %}
+					{% if type == 'affiliate_approve' %} 
+					<option value="affiliate_approve" selected="selected">{{ text_affiliate_approve }}</option>
+					{% else %}   
+					<option value="affiliate_approve">{{ text_affiliate_approve }}</option>
+					{% endif %}
+					{% if type == 'affiliate_transaction' %} 
+					<option value="affiliate_transaction" selected="selected">{{ text_affiliate_transaction }}</option>
+					{% else %}   
+					<option value="affiliate_transaction">{{ text_affiliate_transaction }}</option>
+					{% endif %}
+					{% if type == 'otp_for_register' %} 
+					<option value="otp_for_register" selected="selected">{{ text_otp_for_register }}</option>
+					{% else %}   
+					<option value="otp_for_register">{{ text_otp_for_register }}</option>
+					{% endif %}
+					{% if type == 'otp_for_login' %} 
+					<option value="otp_for_login" selected="selected">{{ text_otp_for_login }}</option>
+					{% else %}   
+					<option value="otp_for_login">{{ text_otp_for_login }}</option>
+					{% endif %}
+					
+					{% if type == 'otp_for_checkout' %} 
+					<option value="otp_for_checkout" selected="selected">{{ text_otp_for_checkout }}</option>
+					{% else %}   
+					<option value="otp_for_checkout">{{ text_otp_for_checkout }}</option>
+					{% endif %}
+                   {% for order_status in order_statuses %} 
+					  {% if order_status.order_status_id == type %} 
+					  <option value="{{ order_status.order_status_id }}" selected="selected">{{ text_status }} {{ order_status.name }}</option>
+					  {% else %}
+					  <option value="{{ order_status.order_status_id }}">{{ text_status }} {{ order_status.name }}</option>
+					  {% endif %}
+					{% endfor %}
+					
+					
+					{% for return_status in return_statuses %} 
+					  {% if return_status.name == type %} 
+					  <option value="{{ return_status.name }}" selected="selected">Return {{ return_status.name }}</option>
+					  {% else %}
+					  <option value="{{ return_status.name }}">Return {{ return_status.name }}</option>
+					  {% endif %}
+					{% endfor %}
+				  </select>
+				</div>
+			  </div>
+			  <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-store">{{ entry_store }}</label>
+				<div class="col-sm-10">
+				  <select name="store_id" class="form-control">
+					{% if not store_id %}
+					<option value="0" selected="selected">{{ text_default }}</option>
+					{% else %}   
+					<option value="0">{{ text_default }}</option>
+					{% endif %}
+					{% for store in stores %} 
+					  {% if store_id == store.store_id %} 
+					  <option value="{{ store.store_id }}" selected="selected">{{ store.name }}</option>
+					  {% else %}   
+					  <option value="{{ store.store_id }}">{{ store.name }}</option>
+					  {%endif %}
+					{%endfor %}
+				  </select>
+				</div>
+			  </div>
+			  
+			  <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-bcc">{{ entry_bcc }}</label>
+				<div class="col-sm-10">
+				  <input type="text" name="bcc" value="{{ bcc }}" class="form-control" />
+				</div>
+			  </div>
+			  <ul id="languages" class="nav nav-tabs">
+				{% for language in languages %} 
+				<li><a href="#language{{ language.language_id }}" data-toggle="tab"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name}}" /> {{ language.name }}</a></li>
+				{% endfor %} 
+			  </ul>
+			  <div class="tab-content">
+				{% for language in languages %} 
+				  <div id="language{{ language.language_id }}" class="tab-pane">
+				  <div class="form-group">
+				<label class="col-sm-2 control-label">{{ text_code }}</label>
+				<div class="col-sm-10">
+				  <div id="code"></div>
+				</div>
+			  </div>
+					<div class="form-group required">
+					  <label class="col-sm-2 control-label" for="input-description-{{ language.language_id }}">{{ entry_message }}</label>
+					  <div class="col-sm-10">
+						<textarea name="description[{{ language.language_id }} ][message]" id="input-description-{{ language.language_id }}" class="form-control" rows="5">{{ description[language.language_id].message }}</textarea></td>
+					    <div id="length-{{ language.language_id }}"></div>
+					  </div>
+					</div>
+				  </div>
+				{% endfor %} 
+			  </div>
+			  
+			</div>
+		  </div>
+		</form>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('select[name=\'type\']').on('change', function() {
+	var html = '';
+	var value = $('select[name=\'type\']').val();
+	if (value == 'register') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{telephone}" class="font12 left setalink" data-token="{telephone}" onclick="insertToken(this)">Telephone</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{password}" class="font12 left setalink" data-token="{password}" onclick="insertToken(this)">Password</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'affiliate') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{telephone}" class="font12 left setalink" data-token="{telephone}" onclick="insertToken(this)">Telephone</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{password}" class="font12 left setalink" data-token="{password}" onclick="insertToken(this)">Password</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'order') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{order_id}" class="font12 left setalink" data-token="{order_id}" onclick="insertToken(this)">Order Id</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{telephone}" class="font12 left setalink" data-token="{telephone}" onclick="insertToken(this)">Telephone</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{date_added}" class="font12 left setalink" data-token="{date_added}" onclick="insertToken(this)">Date Added</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{payment_method}" class="font12 left setalink" data-token="{payment_method}" onclick="insertToken(this)">Payment Method</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{shipping_method}" class="font12 left setalink" data-token="{shipping_method}" onclick="insertToken(this)">Shipping Method</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{ip}" class="font12 left setalink" data-token="{ip}" onclick="insertToken(this)">IP Address</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{payment_address}" class="font12 left setalink" data-token="{payment_address}" onclick="insertToken(this)">Payment Address</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{shipping_address}" class="font12 left setalink" data-token="{shipping_address}" onclick="insertToken(this)">Shipping Address</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{products}" class="font12 left setalink" data-token="{products}" onclick="insertToken(this)">Purchased Products</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{order_comment}" class="font12 left setalink" data-token="{order_comment}" onclick="insertToken(this)">Order Comment</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{order_amount}" class="font12 left setalink" data-token="{order_amount}" onclick="insertToken(this)">Order Amount</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'forgotten') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{password}" class="font12 left setalink" data-token="{password}" onclick="insertToken(this)">Password</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'reward') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{points}" class="font12 left setalink" data-token="{points}" onclick="insertToken(this)">Points</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{total_points}" class="font12 left setalink" data-token="{total_points}" onclick="insertToken(this)">Total Points</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'account_approve') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'account_transaction') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{credits}" class="font12 left setalink" data-token="{credits}" onclick="insertToken(this)">Credits</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{total_credits}" class="font12 left setalink" data-token="{total_credits}" onclick="insertToken(this)">Total Credits</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'affiliate_approve') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'affiliate_transaction') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{commission}" class="font12 left setalink" data-token="{commission}" onclick="insertToken(this)">Commission</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{total_commission}" class="font12 left setalink" data-token="{total_commission}" onclick="insertToken(this)">Total Commission</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'otp_for_checkout') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="[otp]" class="font12 left setalink" data-token="[otp]" onclick="insertToken(this)">OTP</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'otp_for_login') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="[otp]" class="font12 left setalink" data-token="[otp]" onclick="insertToken(this)">OTP</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	} else if (value == 'otp_for_register') {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="[otp]" class="font12 left setalink" data-token="[otp]" onclick="insertToken(this)">OTP</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	}	
+	else if ($.isNumeric(value)) {
+		html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{order_id}" class="font12 left setalink" data-token="{order_id}" onclick="insertToken(this)">Order Id</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{telephone}" class="font12 left setalink" data-token="{telephone}" onclick="insertToken(this)">Telephone</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{date_added}" class="font12 left setalink" data-token="{date_added}" onclick="insertToken(this)">Date Added</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{payment_method}" class="font12 left setalink" data-token="{payment_method}" onclick="insertToken(this)">Payment Method</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{shipping_method}" class="font12 left setalink" data-token="{shipping_method}" onclick="insertToken(this)">Shipping Method</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{ip}" class="font12 left setalink" data-token="{ip}" onclick="insertToken(this)">IP Address</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{payment_address}" class="font12 left setalink" data-token="{payment_address}" onclick="insertToken(this)">Payment Address</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{shipping_address}" class="font12 left setalink" data-token="{shipping_address}" onclick="insertToken(this)">Shipping Address</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{products}" class="font12 left setalink" data-token="{products}" onclick="insertToken(this)">Purchased Products</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{order_comment}" class="font12 left setalink" data-token="{order_comment}" onclick="insertToken(this)">Order Comment</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{order_amount}" class="font12 left setalink" data-token="{order_amount}" onclick="insertToken(this)">Order Amount</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	}
+	else {
+	    html += '<table class="table">';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{order_id}" class="font12 left setalink" data-token="{order_id}" onclick="insertToken(this)">Order Id</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{firstname}" class="font12 left setalink" data-token="{firstname}" onclick="insertToken(this)">First Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{lastname}" class="font12 left setalink" data-token="{lastname}" onclick="insertToken(this)">Last Name</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{email}" class="font12 left setalink" data-token="{email}" onclick="insertToken(this)">Email</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{telephone}" class="font12 left setalink" data-token="{telephone}" onclick="insertToken(this)">Telephone</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{date_added}" class="font12 left setalink" data-token="{date_added}" onclick="insertToken(this)">Date Added</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{return_id}" class="font12 left setalink" data-token="{return_id}" onclick="insertToken(this)">Return Id</a></td>';
+		html += '  </tr>';
+		html += '  <tr>';
+		html += '    <td><a href="javascript:void(0)" id="{products}" class="font12 left setalink" data-token="{products}" onclick="insertToken(this)">Purchased Products</a></td>';
+		html += '    <td><a href="javascript:void(0)" id="{return_comment}" class="font12 left setalink" data-token="{return_comment}" onclick="insertToken(this)">Return Comment</a></td>';
+		html += '  </tr>';
+		html += '</table>';
+	}
+
+	$('#code').html(html);
+});
+function insertToken(obj){
+		var dataToken= $(obj).attr('data-token');
+		insertAtCaret(dataToken);
+		
+}
+
+function insertAtCaret(textFeildValue) 
+   {
+		var textObj = document.getElementById("input-description-1");
+		if (document.all) {
+			if (textObj.createTextRange && textObj.caretPos) {
+				var caretPos  = textObj.caretPos;
+				caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == ' ' ? textFeildValue + ' ' : textFeildValue;
+			}
+			else {
+				textObj.value = textObj.value + textFeildValue;
+			}
+		}
+		else {
+			if (textObj.setSelectionRange) {
+				var rangeStart = textObj.selectionStart;
+				var rangeEnd   = textObj.selectionEnd;
+				var tempStr1   = textObj.value.substring(0, rangeStart);
+				var tempStr2   = textObj.value.substring(rangeEnd);
+	
+				textObj.value  = tempStr1 + textFeildValue + tempStr2;
+			}
+			else {
+				alert("This version of Mozilla based browser does not support setSelectionRange");
+			}
+		}
+	}
+$('select[name=\'type\']').trigger('change');
+
+{% for language in languages %} 
+$('#input-description-{{ language.language_id }}').on('keyup', function() {
+	var unit = Math.ceil($(this).val().length / 160);
+	
+	$('#length-{{ language.language_id }} ').html('Approximately ' + $(this).val().length + ' characters. (' + unit + ' unit)');
+});
+
+$('#input-description-{{ language.language_id }}').trigger('keyup');
+{% endfor %} 
+
+$('#languages a:first').tab('show');
+//--></script> 
+{{ footer }}

@@ -1,0 +1,24 @@
+  {% if booking_methods %}
+  <p>{{ text_booking_method }}</p>
+  {% for booking_method in booking_methods %}
+  <div class="radio">
+    <label>
+      {% if booking_method.code == booking_method_code or not booking_method_code %}
+        {% set booking_method_code = booking_method.code %}
+        <input type="radio" name="booking_method" value="{{ booking_method.code }}" checked="checked" />
+        {% else %}
+        <input type="radio" name="booking_method" value="{{ booking_method.code }}" />
+        {% endif %}
+        {{ booking_method.title }}
+        {% if booking_method.terms %}
+        ({{ booking_method.terms }})
+      {% endif %} 
+    </label>
+  </div>
+  {% endfor %}
+  {% endif %}
+<div class="buttons">
+  <div class="pull-right">
+    <input type="button" value="{{ button_continue }}" id="button-booking-method" data-loading-text="{{ text_loading }}" class="btn btn-primary" />
+  </div>
+</div>

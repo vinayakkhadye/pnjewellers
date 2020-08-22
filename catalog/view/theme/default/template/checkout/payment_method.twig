@@ -1,0 +1,130 @@
+{% if error_warning %}
+<div class="alert alert-warning alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+{% endif %}
+ <!-- Wallet system 
+<div class="alert-info information">
+  <input type="checkbox" value="1" id="useWallet" >
+  <span>Use Wallet</span>
+  <span>(Wallet Balance: $18,865.87, Cart Total: $4,027.00)</span>
+</div>
+<div id="editPayments" >
+  < wallet system ends here -->
+  {% if payment_methods %}
+  <p>{{ text_payment_method }}</p>
+  {% for payment_method in payment_methods %}
+  <div class="radio">
+    <label>{% if payment_method.code == code or not code %}
+      {% set code = payment_method.code %}
+      <input type="radio" name="payment_method" value="{{ payment_method.code }}" checked="checked" />
+      {% else %}
+      <input type="radio" name="payment_method" value="{{ payment_method.code }}" />
+      {% endif %}
+      {{ payment_method.title }}
+      {% if payment_method.terms %}
+      ({{ payment_method.terms }})
+      {% endif %} </label>
+  </div>
+  {% endfor %}
+  {% endif %}
+ <!-- Wallet system 
+</div>
+ wallet system ends here -->
+<p><strong>{{ text_comments }}</strong></p>
+<p>
+  <textarea name="comment" rows="8" class="form-control">{{ comment }}</textarea>
+</p>
+{% if text_agree %}
+<div class="buttons">
+  <div class="pull-right">{{ text_agree }}
+    {% if agree %}
+    <input type="checkbox" name="agree" value="1" checked="checked" />
+    {% else %}
+    <input type="checkbox" name="agree" value="1" />
+    {% endif %}
+    &nbsp;
+    <input type="button" value="{{ button_continue }}" id="button-payment-method" data-loading-text="{{ text_loading }}" class="btn btn-primary" />
+  </div>
+</div>
+{% else %}
+<div class="buttons">
+  <div class="pull-right">
+    <input type="button" value="{{ button_continue }}" id="button-payment-method" data-loading-text="{{ text_loading }}" class="btn btn-primary" />
+  </div>
+</div>
+{% endif %} 
+<!-- Wallet system >
+<style type="text/css">
+  #useWallet {
+    vertical-align: middle;
+    margin: 0;
+  }
+  #useWallet+span {
+    font-size: 18px;
+    vertical-align: middle;
+  }
+  #useWallet + span + span {
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  .information {
+    padding: 8px 14px;
+    border: 1px solid;
+  }
+  .information span{
+    cursor: pointer;
+  }
+</style-->
+
+<!--script type="text/javascript">
+      $(document).ready(function () {
+        //$('input[value="wk_wallet_system_payment"]').parent().text('');
+      });
+
+      $('#useWallet').on('change', function () {
+        callAjax();
+      });
+
+      $('.information span').on('click', function () {
+        if($('#useWallet').is(':checked')) {
+          $('#useWallet').prop('checked', false);
+        } else {
+          $('#useWallet').prop('checked', true);
+        }
+        $('#useWallet').trigger('change');
+      });
+
+      function callAjax () {
+        var isWallet = $('#useWallet').is(':checked');
+
+        $.ajax({
+          url: 'index.php?route=account/wallet/useWallet',
+          type: 'post',
+          data: {isWallet: isWallet},
+          dataType: 'json',
+          beforeSend: function () {
+            {# $('#editPayments').html('<i class="fa fa-spinner fa-spin"></i>'); #}
+          },
+          success: function (json) {
+            console.log(json);
+            {# if (json['payment_methods']) {
+              var payment_methods = json['payment_methods'];
+              var html = '';
+
+              if (json['text']) {
+                html = '<p>' + json['text'] + '</p>';
+              };
+
+              $.each(payment_methods, function( index, value ) {
+                html += '<div class="radio"><label>';
+                html += '<input type="radio" name="payment_method" value="' + payment_methods[index]['code'] + '" checked="checked" />';
+                html += payment_methods[index]['title'] + '</label></div>';
+              });
+
+              $('#editPayments').html(html);
+            } #}
+          }
+        });
+      }
+      </script>
+< wallet system ends here -->
+      
