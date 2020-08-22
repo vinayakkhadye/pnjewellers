@@ -16,7 +16,6 @@ class ControllerCheckoutCart extends Controller {
 			'href' => $this->url->link('checkout/cart'),
 			'text' => $this->language->get('heading_title')
 		);
-
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
 			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				$data['error_warning'] = $this->language->get('error_stock');
@@ -100,9 +99,17 @@ class ControllerCheckoutCart extends Controller {
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
+
+					if($this->session->data['booking_method']['code'] == 'reserve'){
+						
+						$price = $this->currency->format($unit_price * ($product['reserve_price']/100), $this->session->data['currency']);
+						$total = $this->currency->format($unit_price * ($product['reserve_price']/100) * $product['quantity'], $this->session->data['currency']);
+					}else{
 					
-					$price = $this->currency->format($unit_price, $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+						$price = $this->currency->format($unit_price, $this->session->data['currency']);
+						$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+	
+					}
 				} else {
 					$price = false;
 					$total = false;
@@ -175,9 +182,12 @@ class ControllerCheckoutCart extends Controller {
 			);
 			
 			// Display prices
+			
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
-
+				if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
+					$this->session->data['booking_method']['code'] = 'reserve';
+				}	
 				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
@@ -342,6 +352,11 @@ class ControllerCheckoutCart extends Controller {
 
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					if ($this->request->post['reserve']) {
+						$this->session->data['booking_method']['code'] = 'reserve';
+					} else {
+						$this->session->data['booking_method']['code'] = 'buy';
+					}
 					$sort_order = array();
 
 					$results = $this->model_setting_extension->getExtensions('total');
@@ -349,18 +364,15 @@ class ControllerCheckoutCart extends Controller {
 					foreach ($results as $key => $value) {
 						$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
 					}
-
 					array_multisort($sort_order, SORT_ASC, $results);
 
 					foreach ($results as $result) {
 						if ($this->config->get('total_' . $result['code'] . '_status')) {
 							$this->load->model('extension/total/' . $result['code']);
-
 							// We have to put the totals in an array so that they pass by reference.
 							$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
 						}
 					}
-
 					$sort_order = array();
 
 					foreach ($totals as $key => $value) {

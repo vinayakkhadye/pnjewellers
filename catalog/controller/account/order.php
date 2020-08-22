@@ -340,7 +340,8 @@ class ControllerAccountOrder extends Controller {
 
 	public function buyReserved() {
 		$this->load->language('account/order');
-
+		$this->session->data['booking_method']['code'] = 'buy';
+		
 		if (isset($this->request->get['order_id'])) {
 			$order_id = $this->request->get['order_id'];
 		} else {

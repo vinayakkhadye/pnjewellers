@@ -20,7 +20,6 @@ class ControllerCommonCart extends Controller {
 		// Display prices
 		if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 			$sort_order = array();
-
 			$results = $this->model_setting_extension->getExtensions('total');
 
 			foreach ($results as $key => $value) {
@@ -37,7 +36,6 @@ class ControllerCommonCart extends Controller {
 					$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
 				}
 			}
-
 			$sort_order = array();
 
 			foreach ($totals as $key => $value) {
@@ -86,9 +84,14 @@ class ControllerCommonCart extends Controller {
 			// Display prices
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
-				
-				$price = $this->currency->format($unit_price, $this->session->data['currency']);
-				$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+				if($this->session->data['booking_method']['code'] == 'reserve'){
+					$price = $this->currency->format($unit_price * ($product['reserve_price']/100), $this->session->data['currency']);
+					$total = $this->currency->format($unit_price * ($product['reserve_price']/100) * $product['quantity'], $this->session->data['currency']);
+				}else{
+					$price = $this->currency->format($unit_price, $this->session->data['currency']);
+					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
+				}
+
 			} else {
 				$price = false;
 				$total = false;

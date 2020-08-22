@@ -5,10 +5,16 @@
     <label>
       {% if booking_method.code == booking_method_code or not booking_method_code %}
         {% set booking_method_code = booking_method.code %}
-        <input type="radio" name="booking_method" value="{{ booking_method.code }}" checked="checked" />
+        <input 
+          type="radio" 
+          name="booking_method" 
+          value="{{ booking_method.code }}" 
+          checked="checked" 
+        />
         {% else %}
         <input type="radio" name="booking_method" value="{{ booking_method.code }}" />
         {% endif %}
+        
         {{ booking_method.title }}
         {% if booking_method.terms %}
         ({{ booking_method.terms }})

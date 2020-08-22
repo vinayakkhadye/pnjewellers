@@ -2,9 +2,12 @@
 class ModelExtensionTotalSubTotal extends Model {
 	public function getTotal($total) {
 		$this->load->language('extension/total/sub_total');
-
-		$sub_total = $this->cart->getSubTotal();
-
+		if (isset($this->session->data['booking_method']['code']) && $this->session->data['booking_method']['code'] == 'reserve' ) {
+			$sub_total = $this->cart->getReserveSubTotal();
+		} else {
+			$sub_total = $this->cart->getSubTotal();
+		}
+		
 		if (!empty($this->session->data['vouchers'])) {
 			foreach ($this->session->data['vouchers'] as $voucher) {
 				$sub_total += $voucher['amount'];

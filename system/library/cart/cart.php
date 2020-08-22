@@ -52,7 +52,7 @@ class Cart {
 
 					if ($option_query->num_rows) {
 						if ($option_query->row['type'] == 'select' || $option_query->row['type'] == 'radio') {
-							$option_value_query = $this->db->query("SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_option_value_id = '" . (int)$value . "' AND pov.product_option_id = '" . (int)$product_option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+							$option_value_query = $this->db->query("SELECT pov.option_value_id, ovd.name, pov.quantity, pov.subtract, pov.price,pov.reserve_price,price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_option_value_id = '" . (int)$value . "' AND pov.product_option_id = '" . (int)$product_option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 							if ($option_value_query->num_rows) {
 								if ($option_value_query->row['price_prefix'] == '+') {
@@ -88,6 +88,7 @@ class Cart {
 									'quantity'                => $option_value_query->row['quantity'],
 									'subtract'                => $option_value_query->row['subtract'],
 									'price'                   => $option_value_query->row['price'],
+									'reserve_price'                   => $option_value_query->row['reserve_price'],
 									'price_prefix'            => $option_value_query->row['price_prefix'],
 									'points'                  => $option_value_query->row['points'],
 									'points_prefix'           => $option_value_query->row['points_prefix'],
@@ -235,10 +236,20 @@ class Cart {
 					$recurring = false;
 				}
 
+				$product_name = $product_query->row['name'];
+				$product_price = ($price + $option_price);
+				$prodduct_total = ($price + $option_price) * $cart['quantity'];
+
+				if( isset($this->session->data['booking_method']['code']) 
+				&& $this->session->data['booking_method']['code'] == 'reserve' ) {
+					$product_name = $product_query->row['name'] . " - Reserve";
+					$product_price = ($price + $option_price) * ($product_query->row['reserve_price'] /100) ; 
+					$prodduct_total = ($price + $option_price)  * ($product_query->row['reserve_price'] /100) * $cart['quantity'];
+				}
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
 					'product_id'      => $product_query->row['product_id'],
-					'name'            => $product_query->row['name'],
+					'name'            => $product_name,
 					'model'           => $product_query->row['model'],
 					'shipping'        => $product_query->row['shipping'],
 					'image'           => $product_query->row['image'],
@@ -248,8 +259,9 @@ class Cart {
 					'minimum'         => $product_query->row['minimum'],
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
-					'price'           => ($price + $option_price),
-					'total'           => ($price + $option_price) * $cart['quantity'],
+					'price'           => $product_price,
+					'reserve_price'   => $product_query->row['reserve_price'],
+					'total'           => $prodduct_total,
 					'reward'          => $reward * $cart['quantity'],
 					'points'          => ($product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0),
 					'tax_class_id'    => $product_query->row['tax_class_id'],
@@ -320,6 +332,16 @@ class Cart {
 
 		foreach ($this->getProducts() as $product) {
 			$total += $product['total'];
+		}
+
+		return $total;
+	}
+
+	public function getReserveSubTotal() {
+		$total = 0;
+
+		foreach ($this->getProducts() as $product) {
+			$total += ($product['total'] * ($product['reserve_price']/100) );
 		}
 
 		return $total;

@@ -23,7 +23,9 @@
               <td class="text-left">{{ column_start_date }}</td>
               <td class="text-left">{{ column_end_date }}</td>
               <td class="text-left">{{ column_status }}</td>
-              <td class="text-left">Buy</td>
+              <td class="text-left">
+              Buy
+              </td>
             </tr>
           </thead>
           <tbody>
@@ -37,7 +39,13 @@
             <td class="text-left">{{ reservation.start_date }}</td>
             <td class="text-left">{{ reservation.end_date }}</td>
             <td class="text-left">{{ reservation.status }}</td>
-            <td class="text-center"><a href="{{reservation.buyHref}}" data-toggle="tooltip" title="Buy" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a></td>
+            <td class="text-center">
+            {% if reservation.status != 'Complete' %}
+            <a href="{{reservation.buyHref}}" data-toggle="tooltip" title="Buy" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a>
+            {% else %}
+              <i class="fa fa-check"></i>
+            {% endif %}
+            </td>
           </tr>
           {% endfor %}
           {% else %}

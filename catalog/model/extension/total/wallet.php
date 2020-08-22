@@ -14,7 +14,6 @@ class ModelExtensionTotalWallet extends Model {
 			$discount_total = 0;
 			$price_total = 0;
 
-			// print_r($this->cart->getProducts());exit;
 			foreach ($this->cart->getProducts() as $product) {
 				if ($product['total']) {
 					$price_total += $product['total'];

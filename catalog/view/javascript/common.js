@@ -137,11 +137,11 @@ $(document).ready(function() {
 
 // Cart add remove functions
 var cart = {
-	'add': function(product_id, quantity) {
+	'add': function(product_id, quantity, reserve = 0) {
 		$.ajax({
 			url: 'index.php?route=checkout/cart/add',
 			type: 'post',
-			data: 'product_id=' + product_id + '&quantity=' + (typeof(quantity) != 'undefined' ? quantity : 1),
+			data: 'reserve='+ reserve +'&product_id=' + product_id + '&quantity=' + (typeof(quantity) != 'undefined' ? quantity : 1),
 			dataType: 'json',
 			beforeSend: function() {
 				$('#cart > button').button('loading');
@@ -174,11 +174,11 @@ var cart = {
 			}
 		});
 	},
-	'update': function(key, quantity) {
+	'update': function(key, quantity, reserve=0) {
 		$.ajax({
 			url: 'index.php?route=checkout/cart/edit',
 			type: 'post',
-			data: 'key=' + key + '&quantity=' + (typeof(quantity) != 'undefined' ? quantity : 1),
+			data: 'reserve=' + reserve + '&key=' + key + '&quantity=' + (typeof(quantity) != 'undefined' ? quantity : 1),
 			dataType: 'json',
 			beforeSend: function() {
 				$('#cart > button').button('loading');
@@ -203,11 +203,11 @@ var cart = {
 			}
 		});
 	},
-	'remove': function(key) {
+	'remove': function(key, reserve=0) {
 		$.ajax({
 			url: 'index.php?route=checkout/cart/remove',
 			type: 'post',
-			data: 'key=' + key,
+			data: 'reserve=' + reserve + '&key=' + key,
 			dataType: 'json',
 			beforeSend: function() {
 				$('#cart > button').button('loading');
