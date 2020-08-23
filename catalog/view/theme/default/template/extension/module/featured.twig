@@ -35,7 +35,7 @@
         <button type="button" data-toggle="tooltip" title="Add to cart" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><i class="fa fa-shopping-cart"></i> <span class="hidden-xs hidden-sm hidden-md"></span></button>
 
         {% if reseller %}
-        <button type="button" data-toggle="tooltip" title="Reserve" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}', '1');"><i class="fa fa-ticket text-danger"></i> <span class="hidden-xs hidden-sm hidden-md"></span></button>
+        <button type="button" data-toggle="tooltip" title="Reserve" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}', '1');"><i style="color:red" class="fa fa-ticket"></i> <span class="hidden-xs hidden-sm hidden-md"></span></button>
         {% endif %}
 
         <button type="button" data-toggle="tooltip" title="{{ button_wishlist }}" onclick="wishlist.add('{{ product.product_id }}');"><i class="fa fa-heart"></i></button>
