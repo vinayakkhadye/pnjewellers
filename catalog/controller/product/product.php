@@ -14,6 +14,10 @@ class ControllerProductProduct extends Controller {
 
 		$this->load->model('catalog/category');
 
+		if($this->customer->getGroupId() == 2 ) {
+			$data['reseller'] = True;
+		}
+
 		if (isset($this->request->get['path'])) {
 			$path = '';
 

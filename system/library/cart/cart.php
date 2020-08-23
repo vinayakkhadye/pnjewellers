@@ -243,8 +243,8 @@ class Cart {
 				if( isset($this->session->data['booking_method']['code']) 
 				&& $this->session->data['booking_method']['code'] == 'reserve' ) {
 					$product_name = $product_query->row['name'] . " - Reserve";
-					$product_price = ($price + $option_price) * ($product_query->row['reserve_price'] /100) ; 
-					$prodduct_total = ($price + $option_price)  * ($product_query->row['reserve_price'] /100) * $cart['quantity'];
+					$product_price = ($price + $option_price) * ($product_query->row['reserve_price'] / 100) ; 
+					$prodduct_total = ($price + $option_price)  * ($product_query->row['reserve_price'] / 100) * $cart['quantity'];
 				}
 				$product_data[] = array(
 					'cart_id'         => $cart['cart_id'],
@@ -341,6 +341,7 @@ class Cart {
 		$total = 0;
 
 		foreach ($this->getProducts() as $product) {
+			print_r($product);exit;
 			$total += ($product['total'] * ($product['reserve_price']/100) );
 		}
 

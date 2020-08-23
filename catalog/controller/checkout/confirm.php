@@ -384,16 +384,9 @@ class ControllerCheckoutConfirm extends Controller {
 						$recurring .= sprintf($this->language->get('text_payment_cancel'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
 					}
 				}
-				if($this->session->data['booking_method']['code'] == 'reserve') {
-					$price = $this->currency->format(
-						$this->tax->calculate($product['price'] * ($product['reserve_price']/100), $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']
-					);
-					$total = $this->currency->format($this->tax->calculate($product['price'] * ($product['reserve_price']/100), $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']);					
-				} else {
-					$price = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-					$total = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']);
-	
-				}
+				$price = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$total = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']);
+
 
 				$data['products'][] = array(
 					'cart_id'    => $product['cart_id'],

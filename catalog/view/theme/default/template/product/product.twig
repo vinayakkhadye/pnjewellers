@@ -277,8 +277,13 @@
               <label class="control-label" for="input-quantity">{{ entry_qty }}</label>
               <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control" />
               <input type="hidden" name="product_id" value="{{ product_id }}" />
+              <input type="hidden" id="product_reserve" name="reserve" value="0" />
               <br />
               <button type="button" id="button-cart" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-lg btn-block">{{ button_cart }}</button>
+              {% if reseller %}
+              <hr>
+              <button type="button" id="button-reserve" data-loading-text="{{ text_loading }}" class="btn btn-danger btn-lg btn-block">Reserve</button>
+              {% endif %}
             </div>
             {% if minimum > 1 %}
             <div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_minimum }}</div>
@@ -372,7 +377,13 @@ $('select[name=\'recurring_id\'], input[name="quantity"]').change(function(){
 });
 //--></script> 
 <script type="text/javascript"><!--
-$('#button-cart').on('click', function() {
+$('#button-cart, #button-reserve').on('click', function(event) {
+  
+  $('#product_reserve').val("0");
+  if(event.target.id == 'button-reserve'){
+    $('#product_reserve').val("1");
+  }
+
 	$.ajax({
 		url: 'index.php?route=checkout/cart/add',
 		type: 'post',

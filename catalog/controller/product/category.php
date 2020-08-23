@@ -9,6 +9,10 @@ class ControllerProductCategory extends Controller {
 
 		$this->load->model('tool/image');
 
+		if($this->customer->getGroupId() == 2 ) {
+			$data['reseller'] = True;
+		}
+
 		if (isset($this->request->get['filter'])) {
 			$filter = $this->request->get['filter'];
 		} else {

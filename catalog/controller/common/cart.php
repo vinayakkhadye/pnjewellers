@@ -84,13 +84,8 @@ class ControllerCommonCart extends Controller {
 			// Display prices
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
-				if($this->session->data['booking_method']['code'] == 'reserve'){
-					$price = $this->currency->format($unit_price * ($product['reserve_price']/100), $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * ($product['reserve_price']/100) * $product['quantity'], $this->session->data['currency']);
-				}else{
-					$price = $this->currency->format($unit_price, $this->session->data['currency']);
-					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
-				}
+				$price = $this->currency->format($unit_price, $this->session->data['currency']);
+				$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
 
 			} else {
 				$price = false;

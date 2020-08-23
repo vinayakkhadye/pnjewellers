@@ -9,6 +9,11 @@ class ControllerExtensionModuleFeatured extends Controller {
 
 		$data['products'] = array();
 
+		$data['reseller'] = False;
+		if($this->customer->getGroupId() == 2 ) {
+			$data['reseller'] = True;
+		}
+
 		if (!$setting['limit']) {
 			$setting['limit'] = 4;
 		}
@@ -31,7 +36,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 					} else {
 						$price = false;
 					}
-
+					
 					if ((float)$product_info['special']) {
 						$special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 					} else {
@@ -56,6 +61,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 						'name'        => $product_info['name'],
 						'description' => utf8_substr(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 						'price'       => $price,
+						'minimum'     => $product_info['minimum'],
 						'special'     => $special,
 						'tax'         => $tax,
 						'rating'      => $rating,
@@ -64,7 +70,8 @@ class ControllerExtensionModuleFeatured extends Controller {
 				}
 			}
 		}
-
+		// echo "<pre>";
+		// print_r($data);exit;
 		if ($data['products']) {
 			return $this->load->view('extension/module/featured', $data);
 		}

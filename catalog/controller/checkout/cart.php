@@ -99,17 +99,8 @@ class ControllerCheckoutCart extends Controller {
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
-
-					if($this->session->data['booking_method']['code'] == 'reserve'){
-						
-						$price = $this->currency->format($unit_price * ($product['reserve_price']/100), $this->session->data['currency']);
-						$total = $this->currency->format($unit_price * ($product['reserve_price']/100) * $product['quantity'], $this->session->data['currency']);
-					}else{
-					
-						$price = $this->currency->format($unit_price, $this->session->data['currency']);
-						$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
-	
-					}
+					$price = $this->currency->format($unit_price, $this->session->data['currency']);
+					$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
 				} else {
 					$price = false;
 					$total = false;
@@ -326,6 +317,7 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			if (!$json) {
+				// print_r($this->request->post);exit;
 				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
@@ -352,7 +344,7 @@ class ControllerCheckoutCart extends Controller {
 
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					if ($this->request->post['reserve']) {
+					if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
 						$this->session->data['booking_method']['code'] = 'reserve';
 					} else {
 						$this->session->data['booking_method']['code'] = 'buy';
