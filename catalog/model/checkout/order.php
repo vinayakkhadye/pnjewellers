@@ -388,7 +388,7 @@ class ModelCheckoutOrder extends Model {
 			if(isset($this->session->data['reserved_order_id'])) {
 				$reserved_order_id = $this->session->data['reserved_order_id'];
 				unset($this->session->data['reserved_order_id']);
-				$this->addOrderHistory($reserved_order_id, 7);
+				$this->addOrderHistory($reserved_order_id, 11);
 				$this->load->model('account/reservation');
 				$this->model_account_reservation->completeReservation($reserved_order_id, array('status' => 1, 'order_id' => $order_id));
 			}

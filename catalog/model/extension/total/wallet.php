@@ -65,6 +65,14 @@ class ModelExtensionTotalWallet extends Model {
 	}
 
 	public function unconfirm($order_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "wallet WHERE order_id = '" . (int)$order_id . "' AND amount < 0");
+		$sql =  "select customer_id, order_id, amount, status from " . DB_PREFIX . "wallet where order_id =  '" . (int)$order_id . "' AND amount < 0";
+		$query = $this->db->query($sql);
+		
+		if($query->num_rows > 0) {
+			foreach($query->rows as $wallet_row) {
+				$sql = "INSERT INTO " . DB_PREFIX . "wallet SET customer_id = '". $wallet_row['customer_id'] ."', order_id = '". (int)$order_id ."', amount =  '". abs($wallet_row['amount']) ."', transaction_type = 'credit', status = 1, date_added = NOW()";
+				$this->db->query($sql);
+			}
+		}
 	}
 }
