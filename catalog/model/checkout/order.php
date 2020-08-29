@@ -338,7 +338,9 @@ class ModelCheckoutOrder extends Model {
 				}
 				if( isset($this->session->data['booking_method']['code']) &&  $this->session->data['booking_method']['code'] == 'reserve') {
 					// Add reservation if order is for a reservation of a product
-					$this->db->query("INSERT INTO " . DB_PREFIX . "customer_reservation SET order_id = '" . (int)$order_id . "', customer_id = '" . (int)$order_info['customer_id'] . "', status=0, start_date = NOW(), end_date = NOW() + INTERVAL 2 DAY, date_added = NOW(),date_modified = NOW()");
+					$this->load->model('account/reservation');
+					$this->model_account_reservation->newReservation($order_id, $order_info['customer_id']);
+					// $this->db->query("INSERT INTO " . DB_PREFIX . "customer_reservation SET order_id = '" . (int)$order_id . "', customer_id = '" . (int)$order_info['customer_id'] . "', status=0, start_date = NOW(), end_date = NOW() + INTERVAL 2 DAY, date_added = NOW(),date_modified = NOW()");
 				}
 			}
 
