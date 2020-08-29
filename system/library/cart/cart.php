@@ -409,6 +409,11 @@ class Cart {
 	}
 
 	public function hasShipping() {
+		if (isset($this->session->data['booking_method']['code'])
+			&& $this->session->data['booking_method']['code'] == 'reserve') {
+			return false;
+		}
+
 		foreach ($this->getProducts() as $product) {
 			if ($product['shipping']) {
 				return true;
