@@ -12,7 +12,7 @@ class ModelAccountWallet extends Model {
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			$sql .= " ORDER BY " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY date_added";
+			$sql .= " ORDER BY date_added desc";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -53,4 +53,17 @@ class ModelAccountWallet extends Model {
 			return 0;
 		}
 	}
+	public function debit($customer_id, $order_id, $description, $amount) {
+		$sql = "INSERT INTO " . DB_PREFIX . "wallet SET customer_id = '" . (int)$customer_id . "', order_id = '" . (int)$order_id . "', description = '" . $description . "', `transaction_type` = 'debit', amount = '" . (float)-$amount . "', date_added = NOW()";
+
+		$this->db->query($sql);
+
+	}
+	public function credit($customer_id, $order_id, $description, $amount) {
+		$sql = "INSERT INTO " . DB_PREFIX . "wallet SET customer_id = '" . (int)$customer_id . "', order_id = '" . (int)$order_id . "', description = '" . $description . "', `transaction_type` = 'credit', amount = '" . (float)$amount . "', date_added = NOW()";
+
+		$this->db->query($sql);
+
+	}
+
 }

@@ -43,10 +43,7 @@ class ControllerCheckoutPaymentMethod extends Controller {
 			$this->load->model('setting/extension');
 
 			$results = $this->model_setting_extension->getExtensions('payment');
-			// print_r($results);exit;
 			$recurring = $this->cart->hasRecurringProducts();
-			// print_r($recurring);
-			// exit;
 			foreach ($results as $result) {
 				if ($this->config->get('payment_' . $result['code'] . '_status')) {
 					$this->load->model('extension/payment/' . $result['code']);
@@ -65,7 +62,6 @@ class ControllerCheckoutPaymentMethod extends Controller {
 
 				}
 			}
-			// print_r($method_data);exit;
 			$sort_order = array();
 
 			foreach ($method_data as $key => $value) {

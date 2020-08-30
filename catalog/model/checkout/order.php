@@ -261,7 +261,7 @@ class ModelCheckoutOrder extends Model {
 		return $query->rows;
 	}	
 			
-	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false, $reserved = false) {
+	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false) {
 		$order_info = $this->getOrder($order_id);
 		
 		if ($order_info) {
@@ -340,7 +340,6 @@ class ModelCheckoutOrder extends Model {
 					// Add reservation if order is for a reservation of a product
 					$this->load->model('account/reservation');
 					$this->model_account_reservation->newReservation($order_id, $order_info['customer_id']);
-					// $this->db->query("INSERT INTO " . DB_PREFIX . "customer_reservation SET order_id = '" . (int)$order_id . "', customer_id = '" . (int)$order_info['customer_id'] . "', status=0, start_date = NOW(), end_date = NOW() + INTERVAL 2 DAY, date_added = NOW(),date_modified = NOW()");
 				}
 			}
 
@@ -364,17 +363,14 @@ class ModelCheckoutOrder extends Model {
 					}
 				}
 
-				# if order was for reserving products then do not revers the wallet and other payments
-				if($reserved == False){
-					// Remove coupon, vouchers and reward points history
-					$order_totals = $this->getOrderTotals($order_id);
-					
-					foreach ($order_totals as $order_total) {
-						$this->load->model('extension/total/' . $order_total['code']);
+				// Remove coupon, vouchers and reward points history
+				$order_totals = $this->getOrderTotals($order_id);
+				
+				foreach ($order_totals as $order_total) {
+					$this->load->model('extension/total/' . $order_total['code']);
 
-						if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'unconfirm')) {
-							$this->{'model_extension_total_' . $order_total['code']}->unconfirm($order_id);
-						}
+					if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'unconfirm')) {
+						$this->{'model_extension_total_' . $order_total['code']}->unconfirm($order_id);
 					}
 				}
 

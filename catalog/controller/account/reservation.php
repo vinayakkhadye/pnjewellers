@@ -89,7 +89,7 @@ class ControllerAccountReservation extends Controller {
 		$expired_reservations = $this->model_account_reservation->getExpiredReservations();
 		foreach ($expired_reservations  as $reservation ) {
 			#order status set to cancel
-			$this->model_checkout_order->addOrderHistory($reservation['order_id'], 7, '',false, false, true); 
+			$this->model_checkout_order->addOrderHistory($reservation['order_id'], 7); 
 
 			# mark reservation as expired
 			$this->model_account_reservation->expireReservation($reservation['customer_reservation_id'], array('status'=>2));
