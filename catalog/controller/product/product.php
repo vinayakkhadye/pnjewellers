@@ -161,7 +161,6 @@ class ControllerProductProduct extends Controller {
 		$this->load->model('catalog/product');
 
 		$product_info = $this->model_catalog_product->getProduct($product_id);
-
 		if ($product_info) {
 			$url = '';
 
@@ -450,6 +449,7 @@ class ControllerProductProduct extends Controller {
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
 
+			// print_r($data);exit;
 			$this->response->setOutput($this->load->view('product/product', $data));
 		} else {
 			$url = '';

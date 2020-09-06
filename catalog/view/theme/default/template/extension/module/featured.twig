@@ -7,6 +7,10 @@
       <div class="caption">
         <h4><a href="{{ product.href }}">{{ product.name }}</a></h4>
         <p>{{ product.description }}</p>
+        {% if product.stock == 'Out Of Stock' %}
+        <p class="text-danger">{{ product.stock }}</p>
+        {% endif %}
+
         {% if product.rating %}
         <div class="rating">
           {% for i in 5 %}
@@ -18,7 +22,7 @@
           {% endfor %}
         </div>
         {% endif %}
-        {% if product.price %}
+        {% if product.price and product.stock != 'Out Of Stock' %}
         <p class="price">
           {% if not product.special %}
           {{ product.price }}
@@ -31,6 +35,7 @@
         </p>
         {% endif %}
       </div>
+      {% if product.stock != 'Out Of Stock' %}
       <div class="button-group">
         <button type="button" data-toggle="tooltip" title="Add to cart" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><i class="fa fa-shopping-cart"></i> <span class="hidden-xs hidden-sm hidden-md"></span></button>
 
@@ -42,6 +47,7 @@
         
         <button type="button" data-toggle="tooltip" title="{{ button_compare }}" onclick="compare.add('{{ product.product_id }}');"><i class="fa fa-exchange"></i></button>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endfor %}

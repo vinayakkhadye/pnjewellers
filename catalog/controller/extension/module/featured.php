@@ -54,7 +54,14 @@ class ControllerExtensionModuleFeatured extends Controller {
 					} else {
 						$rating = false;
 					}
-
+					if ($product_info['quantity'] <= 0) {
+						$stock = $product_info['stock_status'];
+					} elseif ($this->config->get('config_stock_display')) {
+						$stock = $product_info['quantity'];
+					} else {
+						$stock = 'In Stock';
+					}
+		
 					$data['products'][] = array(
 						'product_id'  => $product_info['product_id'],
 						'thumb'       => $image,
@@ -65,6 +72,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 						'special'     => $special,
 						'tax'         => $tax,
 						'rating'      => $rating,
+						'stock'		  => $stock,
 						'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
 					);
 				}

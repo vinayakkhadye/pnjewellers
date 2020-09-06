@@ -129,8 +129,14 @@
             {% if reward %}
             <li>{{ text_reward }} {{ reward }}</li>
             {% endif %}
+            {% if stock == 'Out Of Stock' %}
+            <li>{{ text_stock }} <span class="text-danger"> {{ stock }}</span></li>
+            {% else %}
             <li>{{ text_stock }} {{ stock }}</li>
+            {% endif %}
           </ul>
+
+          {% if stock != 'Out Of Stock' %}
           {% if price %}
           <ul class="list-unstyled">
             {% if not special %}
@@ -299,6 +305,7 @@
             <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-515eeaf54693130e"></script> 
             <!-- AddThis Button END --> 
           </div>
+          {% endif %}
           {% endif %} </div>
       </div>
       {% if products %}
