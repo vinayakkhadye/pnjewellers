@@ -212,18 +212,28 @@ class Cart {
 				}
 
 				// Stock
-				if ( isset($this->session->data['booking_method']['code'])
-					&& $this->session->data['booking_method']['code'] == 'buy'
-					&& isset($this->session->data['reserved_order_id'])
-					&& !empty($this->session->data['reserved_order_id']) ) {
+				// if ( isset($this->session->data['booking_method']['code'])
+				// 	&& $this->session->data['booking_method']['code'] == 'buy'
+				// 	&& isset($this->session->data['reserved_order_id'])
+				// 	&& !empty($this->session->data['reserved_order_id']) ) {
 
-					$reserved_order_id = $this->session->data['reserved_order_id'];
-					$product_reserved_query = $this->db->query("SELECT op.quantity FROM " . DB_PREFIX . "customer_reservation cr	INNER JOIN " . DB_PREFIX . "order_product op on cr.order_id =op.order_id WHERE  cr.order_id=" . $reserved_order_id . " and cr.customer_id = " . (int)$this->customer->getId() . " and cr.end_date >= now() and cr.status=0 and op.product_id= ". $product_query->row['product_id']);
+				// 	$reserved_order_id = $this->session->data['reserved_order_id'];
+				// 	$product_reserved_query = $this->db->query("SELECT op.quantity FROM " . DB_PREFIX . "customer_reservation cr	INNER JOIN " . DB_PREFIX . "order_product op on cr.order_id =op.order_id WHERE  cr.order_id=" . $reserved_order_id . " and cr.customer_id = " . (int)$this->customer->getId() . " and cr.end_date >= now() and cr.status=0 and op.product_id= ". $product_query->row['product_id']);
+
+				// 	if(isset($product_reserved_query->row['quantity']) &&  $product_reserved_query->row['quantity'] > 0 ) {
+				// 		$product_query->row['quantity'] += $product_reserved_query->row['quantity'];
+				// 	}
+				// }
+				if($cart['reservation_order_id']) {
+					$reservation_order_id = $cart['reservation_order_id'];
+					$sql = "SELECT op.quantity FROM " . DB_PREFIX . "order_product op WHERE op.order_id=" . $reservation_order_id . " and op.reservation_end >= now() and op.reservation_status=0 and op.product_id= ". $product_query->row['product_id'];
+					$product_reserved_query = $this->db->query($sql);
 
 					if(isset($product_reserved_query->row['quantity']) &&  $product_reserved_query->row['quantity'] > 0 ) {
 						$product_query->row['quantity'] += $product_reserved_query->row['quantity'];
 					}
 				}
+
 
 				if (!$product_query->row['quantity'] || ($product_query->row['quantity'] < $cart['quantity'])) {
 					$stock = false;
@@ -253,8 +263,8 @@ class Cart {
 				$product_price = ($price + $option_price);
 				$prodduct_total = ($price + $option_price) * $cart['quantity'];
 				
-				if(isset($this->session->data['booking_method']['code'])
-					&& $this->session->data['booking_method']['code'] == 'reserve') {
+				
+				if($cart['is_reserved']) {
 					$product_name = $product_query->row['name'] . " - Reserve";
 					$product_price = ($price + $option_price) * ($product_query->row['reserve_price'] / 100) ; 
 					$prodduct_total = ($price + $option_price)  * ($product_query->row['reserve_price'] / 100) * $cart['quantity'];
@@ -265,7 +275,7 @@ class Cart {
 					'product_id'      => $product_query->row['product_id'],
 					'name'            => $product_name,
 					'model'           => $product_query->row['model'],
-					'shipping'        => $product_query->row['shipping'],
+					'shipping'        => $cart['is_reserved'] ? False : $product_query->row['shipping'],
 					'image'           => $product_query->row['image'],
 					'option'          => $option_data,
 					'download'        => $download_data,
@@ -274,6 +284,8 @@ class Cart {
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,
 					'price'           => $product_price,
+					'is_reserved'	  => $cart['is_reserved'],
+					'reservation_order_id' => $cart['reservation_order_id'],	
 					'reserve_price'   => $product_query->row['reserve_price'],
 					'total'           => $prodduct_total,
 					'reward'          => $reward * $cart['quantity'],
@@ -295,13 +307,13 @@ class Cart {
 		return $product_data;
 	}
 
-	public function add($product_id, $quantity = 1, $option = array(), $recurring_id = 0) {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "cart WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "'");
+	public function add($product_id, $quantity = 1, $option = array(), $recurring_id = 0, $is_reserved = 0, $reservation_order_id = NULL) {
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "cart WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "' AND is_reserved = '". $is_reserved ."' AND reservation_order_id = '" . $reservation_order_id . "'");
 
 		if (!$query->row['total']) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "cart SET api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "', customer_id = '" . (int)$this->customer->getId() . "', session_id = '" . $this->db->escape($this->session->getId()) . "', product_id = '" . (int)$product_id . "', recurring_id = '" . (int)$recurring_id . "', `option` = '" . $this->db->escape(json_encode($option)) . "', quantity = '" . (int)$quantity . "', date_added = NOW()");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "cart SET api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "', customer_id = '" . (int)$this->customer->getId() . "', session_id = '" . $this->db->escape($this->session->getId()) . "', product_id = '" . (int)$product_id . "', recurring_id = '" . (int)$recurring_id . "', `option` = '" . $this->db->escape(json_encode($option)) . "', quantity = '" . (int)$quantity . "', is_reserved = '". $is_reserved ."', reservation_order_id = '". $reservation_order_id ."', date_added = NOW()");
 		} else {
-			$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = (quantity + " . (int)$quantity . ") WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "'");
+			$this->db->query("UPDATE " . DB_PREFIX . "cart SET quantity = (quantity + " . (int)$quantity . ") WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "' AND product_id = '" . (int)$product_id . "' AND recurring_id = '" . (int)$recurring_id . "' AND `option` = '" . $this->db->escape(json_encode($option)) . "' AND is_reserved = '". $is_reserved ."' AND  reservation_order_id = '". $reservation_order_id ."'");
 		}
 	}
 
@@ -423,10 +435,10 @@ class Cart {
 	}
 
 	public function hasShipping() {
-		if (isset($this->session->data['booking_method']['code'])
-			&& $this->session->data['booking_method']['code'] == 'reserve') {
-			return false;
-		}
+		// if (isset($this->session->data['booking_method']['code'])
+		// 	&& $this->session->data['booking_method']['code'] == 'reserve') {
+		// 	return false;
+		// }
 
 		foreach ($this->getProducts() as $product) {
 			if ($product['shipping']) {

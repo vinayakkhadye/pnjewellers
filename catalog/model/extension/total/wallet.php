@@ -19,12 +19,12 @@ class ModelExtensionTotalWallet extends Model {
 					$price_total += $product['total'];
 				}
 			}
-			if( isset($this->session->data['shipping_method']) 
-			&& isset($this->session->data['booking_method']['code'])
-			&& $this->session->data['booking_method']['code'] == 'buy' 
-			) {
-				$price_total = $price_total + $this->session->data['shipping_method']['cost'];
-			}
+			// if( isset($this->session->data['shipping_method']) 
+			// && isset($this->session->data['booking_method']['code'])
+			// && $this->session->data['booking_method']['code'] == 'buy' 
+			// ) {
+				// $price_total = $price_total + $this->session->data['shipping_method']['cost'];
+			// }
 			
 			if(  $price_total < $this->session->data['wallet'] ){
 				$discount_total = $price_total;	

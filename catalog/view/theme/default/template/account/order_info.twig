@@ -79,10 +79,30 @@
               {% for option in product.option %} <br />
               &nbsp;<small> - {{ option.name }}: {{ option.value }}</small> {% endfor %}</td>
             <td class="text-left">{{ product.model }}</td>
-            <td class="text-right">{{ product.quantity }}</td>
+            <td class="text-right">
+            {% if product.is_reserved and product.reservation_status == 1 %}
+            Reservation quantity Used
+            {% else %}
+            {{ product.quantity }}
+            {% endif   %}
+            </td>
             <td class="text-right">{{ product.price }}</td>
             <td class="text-right">{{ product.total }}</td>
-            <td class="text-right" style="white-space: nowrap;">{% if product.reorder %} <a href="{{ product.reorder }}" data-toggle="tooltip" title="{{ button_reorder }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a> {% endif %} <a href="{{ product.return }}" data-toggle="tooltip" title="{{ button_return }}" class="btn btn-danger"><i class="fa fa-reply"></i></a></td>
+            <td class="text-right" style="white-space: nowrap;">
+            {% if product.is_reserved %}
+            {% if product.reservation_status == 1 %}
+            <a href="javascript:;" data-toggle="tooltip" title="Reservation Complete" class="btn btn-primary" ><i class="fa fa-check"></i></a>
+            {% else %}
+            <a href="{{ product.buy_reserved }}" data-toggle="tooltip" title="{{ button_buy_reserved }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a>
+
+            {% endif %} 
+            {% else %}
+            {% if product.reorder %} 
+            <a href="{{ product.reorder }}" data-toggle="tooltip" title="{{ button_reorder }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a> 
+            {% endif %} 
+            <a href="{{ product.return }}" data-toggle="tooltip" title="{{ button_return }}" class="btn btn-danger"><i class="fa fa-reply"></i></a>
+            {% endif %}
+            </td>
           </tr>
           {% endfor %}
           {% for voucher in vouchers %}

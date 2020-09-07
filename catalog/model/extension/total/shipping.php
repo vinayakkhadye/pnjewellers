@@ -4,8 +4,8 @@ class ModelExtensionTotalShipping extends Model {
 		if (
 			$this->cart->hasShipping() 
 			&& isset($this->session->data['shipping_method'])
-			&& isset($this->session->data['booking_method']['code'])
-			&& $this->session->data['booking_method']['code'] == 'buy'
+			// && isset($this->session->data['booking_method']['code'])
+			// && $this->session->data['booking_method']['code'] == 'buy'
 		) {
 			$total['totals'][] = array(
 				'code'       => 'shipping',

@@ -36,7 +36,6 @@ class ControllerCheckoutConfirm extends Controller {
 
 		// Validate minimum quantity requirements.
 		$products = $this->cart->getProducts();
-
 		foreach ($products as $product) {
 			$product_total = 0;
 
@@ -249,7 +248,9 @@ class ControllerCheckoutConfirm extends Controller {
 					'price'      => $product['price'],
 					'total'      => $product['total'],
 					'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
-					'reward'     => $product['reward']
+					'reward'     => $product['reward'],
+					'is_reserved'=> $product['is_reserved'],
+					'reservation_order_id' => $product['reservation_order_id']
 				);
 			}
 

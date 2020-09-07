@@ -12,7 +12,7 @@ class ControllerExtensionModuleAccount extends Controller {
 		$data['edit'] = $this->url->link('account/edit', '', true);
 		$data['password'] = $this->url->link('account/password', '', true);
 		$data['wallet'] = $this->url->link('account/wallet', '', true);
-		$data['reservation'] = $this->url->link('account/reservation', '', true);
+		// $data['reservation'] = $this->url->link('account/reservation', '', true);
 		$data['address'] = $this->url->link('account/address', '', true);
 		$data['wishlist'] = $this->url->link('account/wishlist');
 		$data['order'] = $this->url->link('account/order', '', true);

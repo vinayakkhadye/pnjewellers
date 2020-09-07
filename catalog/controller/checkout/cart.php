@@ -17,6 +17,7 @@ class ControllerCheckoutCart extends Controller {
 			'text' => $this->language->get('heading_title')
 		);
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
+
 			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				$data['error_warning'] = $this->language->get('error_stock');
 			} elseif (isset($this->session->data['error'])) {
@@ -55,7 +56,7 @@ class ControllerCheckoutCart extends Controller {
 			$data['products'] = array();
 
 			$products = $this->cart->getProducts();
-
+			// echo '<pre>';print_r($products);exit;
 			foreach ($products as $product) {
 				$product_total = 0;
 
@@ -176,9 +177,9 @@ class ControllerCheckoutCart extends Controller {
 			
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
-				if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
-					$this->session->data['booking_method']['code'] = 'reserve';
-				}	
+				// if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
+				// 	$this->session->data['booking_method']['code'] = 'reserve';
+				// }	
 				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
@@ -233,7 +234,7 @@ class ControllerCheckoutCart extends Controller {
 					}
 				}
 			}
-
+			// echo "<pre>";print_r($data);exit;
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
@@ -317,8 +318,7 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			if (!$json) {
-				// print_r($this->request->post);exit;
-				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
+				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id, $this->request->post['reserve']);
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
 
@@ -344,11 +344,11 @@ class ControllerCheckoutCart extends Controller {
 
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
-						$this->session->data['booking_method']['code'] = 'reserve';
-					} else {
-						$this->session->data['booking_method']['code'] = 'buy';
-					}
+					// if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
+					// 	$this->session->data['booking_method']['code'] = 'reserve';
+					// } else {
+					// 	$this->session->data['booking_method']['code'] = 'buy';
+					// }
 					$sort_order = array();
 
 					$results = $this->model_setting_extension->getExtensions('total');

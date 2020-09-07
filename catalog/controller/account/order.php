@@ -239,7 +239,6 @@ class ControllerAccountOrder extends Controller {
 			$data['products'] = array();
 
 			$products = $this->model_account_order->getOrderProducts($this->request->get['order_id']);
-
 			foreach ($products as $product) {
 				$option_data = array();
 
@@ -280,7 +279,12 @@ class ControllerAccountOrder extends Controller {
 					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'reorder'  => $reorder,
-					'return'   => $this->url->link('account/return/add', 'order_id=' . $order_info['order_id'] . '&product_id=' . $product['product_id'], true)
+					'return'   => $this->url->link('account/return/add', 'order_id=' . $order_info['order_id'] . '&product_id=' . $product['product_id'], true),
+					'is_reserved' => $product['is_reserved'],
+					'reservation_status' => $product['reservation_status'],
+					'reservation_start' => $product['reservation_start'],
+					'reservation_end' => $product['reservation_end'],
+					'buy_reserved' => $this->url->link('account/order/buyreserved', 'order_id=' . $order_info['order_id'] , true)
 				);
 			}
 
@@ -322,7 +326,7 @@ class ControllerAccountOrder extends Controller {
 					'comment'    => $result['notify'] ? nl2br($result['comment']) : ''
 				);
 			}
-
+			// print_r($data);exit;
 			$data['continue'] = $this->url->link('account/order', '', true);
 
 			$data['column_left'] = $this->load->controller('common/column_left');
@@ -332,15 +336,16 @@ class ControllerAccountOrder extends Controller {
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
 
+			
 			$this->response->setOutput($this->load->view('account/order_info', $data));
 		} else {
 			return new Action('error/not_found');
 		}
 	}
 
-	public function buyReserved() {
+	public function buyreserved() {
 		$this->load->language('account/order');
-		$this->session->data['booking_method']['code'] = 'buy';
+		// $this->session->data['booking_method']['code'] = 'buy';
 		
 		if (isset($this->request->get['order_id'])) {
 			$order_id = $this->request->get['order_id'];
@@ -384,7 +389,7 @@ class ControllerAccountOrder extends Controller {
 							}
 						}
 
-						$this->cart->add($order_product_info['product_id'], $order_product_info['quantity'], $option_data);
+						$this->cart->add($order_product_info['product_id'], $order_product_info['quantity'], $option_data, 0, 0, $order_id);
 
 						$this->session->data['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $product_info['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
 

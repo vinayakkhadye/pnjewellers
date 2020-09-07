@@ -8,7 +8,14 @@ class ModelCheckoutOrder extends Model {
 		// Products
 		if (isset($data['products'])) {
 			foreach ($data['products'] as $product) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (int)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'");
+				$reservation_query = '';
+				if($product['is_reserved']) {
+					$reservation_query = ", is_reserved = '". $product['is_reserved'] ."', reservation_start = NOW(), reservation_end = NOW() + INTERVAL 2 DAY, reservation_status = 0";
+				} else if($product['reservation_order_id']) {
+					$reservation_query = ", reservation_order_id = ". $product['reservation_order_id'];
+				}
+				$sql = "INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (int)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'". $reservation_query;
+				$this->db->query($sql);
 
 				$order_product_id = $this->db->getLastId();
 
@@ -242,7 +249,17 @@ class ModelCheckoutOrder extends Model {
 		
 		return $query->rows;
 	}
-	
+
+	public function getOrderProduct($order_id, $product_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "' AND product_id = '". $product_id ."'");
+		
+		return $query->row;
+	}
+
+	public function updateOrderProduct($order_id, $product_id, $data) {
+		$this->db->query("UPDATE " . DB_PREFIX . "order_product SET reservation_status = '" . (int)$data['reservation_status'] . "', quantity = '".$data['quantity']."' WHERE order_id = '" . (int)$order_id . "' AND product_id = '". $product_id ."'");
+	}
+
 	public function getOrderOptions($order_id, $order_product_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id = '" . (int)$order_product_id . "'");
 		
@@ -336,11 +353,11 @@ class ModelCheckoutOrder extends Model {
 						$this->model_account_customer->addTransaction($order_info['affiliate_id'], $this->language->get('text_order_id') . ' #' . $order_id, $order_info['commission'], $order_id);
 					}
 				}
-				if( isset($this->session->data['booking_method']['code']) &&  $this->session->data['booking_method']['code'] == 'reserve') {
-					// Add reservation if order is for a reservation of a product
-					$this->load->model('account/reservation');
-					$this->model_account_reservation->newReservation($order_id, $order_info['customer_id']);
-				}
+				// if( isset($this->session->data['booking_method']['code']) &&  $this->session->data['booking_method']['code'] == 'reserve') {
+				// 	// Add reservation if order is for a reservation of a product
+				// 	$this->load->model('account/reservation');
+				// 	$this->model_account_reservation->newReservation($order_id, $order_info['customer_id']);
+				// }
 			}
 
 			// Update the DB with the new statuses
@@ -383,13 +400,13 @@ class ModelCheckoutOrder extends Model {
 			}
 
 			#if order is reserved before then cancel this previous order give money back, to restock the quantity and proceed with new order.
-			if(isset($this->session->data['reserved_order_id'])) {
-				$reserved_order_id = $this->session->data['reserved_order_id'];
-				unset($this->session->data['reserved_order_id']);
-				$this->addOrderHistory($reserved_order_id, 11);
-				$this->load->model('account/reservation');
-				$this->model_account_reservation->completeReservation($reserved_order_id, array('status' => 1, 'order_id' => $order_id));
-			}
+			// if(isset($this->session->data['reserved_order_id'])) {
+			// 	$reserved_order_id = $this->session->data['reserved_order_id'];
+			// 	unset($this->session->data['reserved_order_id']);
+			// 	$this->addOrderHistory($reserved_order_id, 11);
+			// 	$this->load->model('account/reservation');
+			// 	$this->model_account_reservation->completeReservation($reserved_order_id, array('status' => 1, 'order_id' => $order_id));
+			// }
 
 			$this->cache->delete('product');
 		}
