@@ -47,7 +47,6 @@ class ControllerCheckoutPaymentAddress extends Controller {
 		} else {
 			$data['payment_address_custom_field'] = array();
 		}
-
 		$this->response->setOutput($this->load->view('checkout/payment_address', $data));
 	}
 

@@ -53,7 +53,21 @@ class ControllerCheckoutShippingAddress extends Controller {
 		} else {
 			$data['shipping_address_custom_field'] = array();
 		}
-		
+
+		$this->load->model('tool/image');
+		foreach ($this->cart->getProducts() as $product) {
+			$data['products'][] = array(
+				'id' 		 => $product['product_id'],
+				'name'       => $product['name'],
+				'model'      => $product['model'],
+				'quantity'   => $product['quantity'],
+				'subtract'   => $product['subtract'],
+				'price'      => $product['price'],
+				'total'      => $product['total'],
+				'image'	     => $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'))
+			);
+		}
+
 		$this->response->setOutput($this->load->view('checkout/shipping_address', $data));
 	}
 
@@ -112,6 +126,15 @@ class ControllerCheckoutShippingAddress extends Controller {
 					unset($this->session->data['shipping_method']);
 					unset($this->session->data['shipping_methods']);
 				}
+			}	
+			else if (isset($this->request->post['shipping_address']) && $this->request->post['shipping_address'] == 'multiple') {
+				if ( isset($this->request->post['address_id']) && sizeof ($this->request->post['address_id']) > 0 ) {
+					$this->session->data['product_address_mapping'] = $this->request->post['address_id']; 
+					foreach($this->request->post['address_id'] as $pr_id => $addr_id){
+						$this->session->data['product_address_mapping'][$pr_id] = array("address_id"=>$addr_id, 
+						"quantity"=> $this->request->post['product_quantity'][$pr_id]);
+					}
+				}
 			} else {
 				if ((utf8_strlen(trim($this->request->post['firstname'])) < 1) || (utf8_strlen(trim($this->request->post['firstname'])) > 32)) {
 					$json['error']['firstname'] = $this->language->get('error_firstname');
@@ -162,7 +185,7 @@ class ControllerCheckoutShippingAddress extends Controller {
 
 				if (!$json) {
 					$address_id = $this->model_account_address->addAddress($this->customer->getId(), $this->request->post);
-
+					
 					$this->session->data['shipping_address'] = $this->model_account_address->getAddress($address_id);
 
 					// If no default address ID set we use the last address

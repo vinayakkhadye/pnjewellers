@@ -18,6 +18,29 @@
   </div>
   <div class="radio">
     <label>
+      <input type="radio" name="shipping_address" value="multiple" />{{ text_address_multiple }}
+    </label>
+  </div>
+  <div id="shipping-multiple-existing" style="display:none">
+
+  {% for product in products %}
+      <input type="text" name="product_quantity[{{product.id}}]" value="{{product.quantity}}" readonly />
+      <img src="{{ product.image }}" alt="{{product.name}}">
+      <select name="address_id[{{product.id}}]" class="form-control">
+        {% for address in addresses %}
+        {% if address.address_id == address_id %}
+        <option value="{{ address.address_id }}" selected="selected">{{ address.firstname }} {{ address.lastname }}, {{ address.address_1 }}, {{ address.city }}, {{ address.zone }}, {{ address.country }}</option>
+        {% else %}
+        <option value="{{ address.address_id }}">{{ address.firstname }} {{ address.lastname }}, {{ address.address_1 }}, {{ address.city }}, {{ address.zone }}, {{ address.country }}</option>
+        {% endif %}
+        {% endfor %}  
+      </select>
+      {# <button data-toggle="modal" data-target="#id01" class="btn btn-primary btn-sm" type="button" id="add-address-button" name="add-address-button">Add New</button> #}
+  {% endfor %}
+
+  </div>
+  <div class="radio">
+    <label>
       <input type="radio" name="shipping_address" value="new" />
       {{ text_address_new }}</label>
   </div>
@@ -203,15 +226,104 @@
     </div>
   </div>
 </form>
+
+<div id="id01" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <b> New Address Form </b>
+      </div>
+      <div class="modal-body">
+        <form id="new-address-form" onsubmit="return false" class="form-horizontal" method="post">
+          
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-firstname">{{ entry_firstname }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="firstname" value="" placeholder="{{ entry_firstname }}" id="input-multi-shipping-firstname" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-lastname">{{ entry_lastname }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="lastname" value="" placeholder="{{ entry_lastname }}" id="input-multi-shipping-lastname" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-company">{{ entry_company }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="company" value="" placeholder="{{ entry_company }}" id="input-multi-shipping-company" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-address-1">{{ entry_address_1 }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="address_1" value="" placeholder="{{ entry_address_1 }}" id=" input-multi-shipping-address-1" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-address-2">{{ entry_address_2 }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="address_2" value="" placeholder="{{ entry_address_2 }}" id="input-multi-shipping-address-2" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-city">{{ entry_city }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="city" value="" placeholder="{{ entry_city }}" id="input-multi-shipping-city" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-postcode">{{ entry_postcode }}</label>
+            <div class="col-sm-8">
+              <input type="text" name="postcode" value="{{ postcode }}" placeholder="{{ entry_postcode }}" id="input-multi-shipping-postcode" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-country">{{ entry_country }}</label>
+            <div class="col-sm-8">
+              <select name="country_id" id="input-multi-shipping-country" class="form-control">
+                <option value="">{{ text_select }}</option>
+                {% for country in countries %}
+                {% if country.country_id == country_id %}
+                <option value="{{ country.country_id }}" selected="selected">{{ country.name }}</option>
+                {% else %}
+                <option value="{{ country.country_id }}">{{ country.name }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group required">
+            <label class="col-sm-4 control-label" for="input-multi-shipping-zone">{{ entry_zone }}</label>
+            <div class="col-sm-8">
+              <select name="zone_id" id="input-multi-shipping-zone" class="form-control">
+              </select>
+            </div>
+          </div>
+          <button data-dismiss="modal" class="btn btn-primary" type="button" id="submit-address-button" name="submit-address-button">Submit</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script type="text/javascript"><!--
 $('input[name=\'shipping_address\']').on('change', function() {
 	if (this.value == 'new') {
 		$('#shipping-existing').hide();
+    $('#shipping-multiple-existing').hide();
 		$('#shipping-new').show();
-	} else {
-		$('#shipping-existing').show();
+	} else if(this.value == 'existing' ) {
+    $('#shipping-multiple-existing').hide();
 		$('#shipping-new').hide();
-	}
+		$('#shipping-existing').show();
+	} else if(this.value == 'multiple') {
+		$('#shipping-new').hide();
+		$('#shipping-existing').hide();
+    $('#shipping-multiple-existing').show();
+  }
 });
 //--></script>
 <script type="text/javascript"><!--
