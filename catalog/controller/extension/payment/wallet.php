@@ -31,7 +31,7 @@ class ControllerExtensionPaymentWallet extends Controller {
 		
 						$this->model_account_wallet->credit($order_info['customer_id'], $reserve_order_product['order_id'], $desc, $total);						
 						$refund_status = 11;
-						$comment = "Total ". $total . " RS amount credited for buying ".$order_product['quantity'] ." reserved product(s).";
+						$comment = "₹". $total . " credited for buying ".$order_product['quantity'] ." reserved product(s).";
 						$this->model_checkout_order->addOrderHistory($reserve_order_product['order_id'], $refund_status, $comment, true);
 
 						if($reserve_order_product['quantity'] > $order_product['quantity'] ){

@@ -238,6 +238,17 @@ class ControllerAccountOrder extends Controller {
 			// Products
 			$data['products'] = array();
 
+
+			$cart_products = $this->cart->getProducts();
+
+			if($cart_products){
+				foreach ($cart_products as $cart_product) {
+					$product_id = $cart_product['product_id'];
+					$data['cart_products'][$product_id]['name'] = $cart_product['name'] ; 
+					$data['cart_products'][$product_id]['quantity'] = $cart_product['quantity'] ; 
+				}
+			}
+
 			$products = $this->model_account_order->getOrderProducts($this->request->get['order_id']);
 			foreach ($products as $product) {
 				$option_data = array();
@@ -270,10 +281,18 @@ class ControllerAccountOrder extends Controller {
 				} else {
 					$reorder = '';
 				}
+				
+				if(isset($data['cart_products']) && array_key_exists($product['product_id'], $data['cart_products'])) {
 
+					$product['quantity'] = $product['quantity'] - $data['cart_products'][$product['product_id']]['quantity'];
+				}
+				
 				$data['products'][] = array(
 					'name'     => $product['name'],
 					'model'    => $product['model'],
+					'product_id' => $product['product_id'], 
+					'order_product_id' => $product['order_product_id'], 
+					'order_id' => $order_info['order_id'],
 					'option'   => $option_data,
 					'quantity' => $product['quantity'],
 					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
@@ -284,7 +303,7 @@ class ControllerAccountOrder extends Controller {
 					'reservation_status' => $product['reservation_status'],
 					'reservation_start' => $product['reservation_start'],
 					'reservation_end' => $product['reservation_end'],
-					'buy_reserved' => $this->url->link('account/order/buyreserved', 'order_id=' . $order_info['order_id'] . '&order_product_id=' . $product['order_product_id'], true)
+					// 'buy_reserved' => $this->url->link('account/order/buyreserved', 'order_id=' . $order_info['order_id'] . '&order_product_id=' . $product['order_product_id'], true)
 				);
 			}
 
@@ -326,6 +345,7 @@ class ControllerAccountOrder extends Controller {
 					'comment'    => $result['notify'] ? nl2br($result['comment']) : ''
 				);
 			}
+
 			$data['continue'] = $this->url->link('account/order', '', true);
 
 			$data['column_left'] = $this->load->controller('common/column_left');
@@ -344,8 +364,8 @@ class ControllerAccountOrder extends Controller {
 	public function buyreserved() {
 		$this->load->language('account/order');
 		
-		if (isset($this->request->get['order_id'])) {
-			$order_id = $this->request->get['order_id'];
+		if (isset($this->request->post['order_id'])) {
+			$order_id = $this->request->post['order_id'];
 		} else {
 			$order_id = 0;
 		}
@@ -353,10 +373,11 @@ class ControllerAccountOrder extends Controller {
 		$this->load->model('account/order');
 
 		$order_info = $this->model_account_order->getOrder($order_id);
-
+		$json = array();
+		
 		if ($order_info) {
-			if (isset($this->request->get['order_product_id'])) {
-				$order_product_id = $this->request->get['order_product_id'];
+			if (isset($this->request->post['order_product_id'])) {
+				$order_product_id = $this->request->post['order_product_id'];
 			} else {
 				$order_product_id = 0;
 			}
@@ -386,7 +407,50 @@ class ControllerAccountOrder extends Controller {
 
 					$this->cart->add($order_product_info['product_id'], $order_product_info['quantity'], $option_data, 0, 0, $order_id);
 
-					$this->session->data['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $product_info['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
+					$json['success'] = $this->session->data['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $product_info['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
+
+					// Totals
+					$this->load->model('setting/extension');
+
+					$totals = array();
+					$taxes = $this->cart->getTaxes();
+					$total = 0;
+			
+					// Because __call can not keep var references so we put them into an array. 			
+					$total_data = array(
+						'totals' => &$totals,
+						'taxes'  => &$taxes,
+						'total'  => &$total
+					);
+
+					// Display prices
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$sort_order = array();
+
+						$results = $this->model_setting_extension->getExtensions('total');
+
+						foreach ($results as $key => $value) {
+							$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+						}
+						array_multisort($sort_order, SORT_ASC, $results);
+
+						foreach ($results as $result) {
+							if ($this->config->get('total_' . $result['code'] . '_status')) {
+								$this->load->model('extension/total/' . $result['code']);
+								// We have to put the totals in an array so that they pass by reference.
+								$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+							}
+						}
+						$sort_order = array();
+
+						foreach ($totals as $key => $value) {
+							$sort_order[$key] = $value['sort_order'];
+						}
+
+						array_multisort($sort_order, SORT_ASC, $totals);
+					}
+
+					$json['total'] = sprintf('%s item(s) - %s', $this->cart->countProducts() + (isset($this->session->data['vouchers']) ? count($this->session->data['vouchers']) : 0), $this->currency->format($total, $this->session->data['currency']));
 
 					unset($this->session->data['shipping_method']);
 					unset($this->session->data['shipping_methods']);
@@ -397,8 +461,11 @@ class ControllerAccountOrder extends Controller {
 				}
 			}
 		}
-		$this->session->data['reserved_order_id'] = $order_id;
-		$this->response->redirect($this->url->link('checkout/checkout'));
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+		
+		// $this->response->redirect($this->url->link('checkout/checkout'));
 	}
 
 	public function reorder() {

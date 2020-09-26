@@ -155,7 +155,6 @@ var cart = {
 				if (json['redirect']) {
 					location = json['redirect'];
 				}
-
 				if (json['success']) {
 					$('#content').parent().before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 
@@ -224,6 +223,52 @@ var cart = {
 				if (getURLVar('route') == 'checkout/cart' || getURLVar('route') == 'checkout/checkout') {
 					location = 'index.php?route=checkout/cart';
 				} else {
+					$('#cart > ul').load('index.php?route=common/cart/info ul li');
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	}
+}
+
+// Reserve buy functions
+var reserve = {
+	'buy': function(order_id, order_product_id) {
+		$.ajax({
+			url: 'index.php?route=account/order/buyreserved',
+			type: 'post',
+			data: 'order_id=' + order_id + '&order_product_id=' + order_product_id,
+			dataType: 'json',
+			beforeSend: function() {
+				let btn = $('#order_product_' + order_product_id);
+				btn.toggleClass('loading');
+			},
+			complete: function() {
+				let btn = $('#order_product_' + order_product_id);
+				btn.toggleClass('reset');
+			},
+			success: function(json) {
+				$('.alert-dismissible, .text-danger').remove();
+
+				if (json['redirect']) {
+					location = json['redirect'];
+				}
+				if (json['success']) {
+					$('#content').parent().before('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+
+					// Need to set timeout otherwise it wont update the total
+					setTimeout(function () {
+						$('#order_product_' + order_product_id + ' > i').removeClass("fa fa-shopping-cart");
+						$('#order_product_' + order_product_id + ' > i').addClass("fa fa-check");
+						$('#order_product_quantity_' + order_product_id).html("Reservation quantity Used");
+						$('#cart > button').html('<span id="cart-total"><i class="fa fa-shopping-cart"></i> ' + json['total'] + '</span>');
+					}, 100);
+
+					$('html, body').animate({ scrollTop: 0 }, 'slow');
+
 					$('#cart > ul').load('index.php?route=common/cart/info ul li');
 				}
 			},

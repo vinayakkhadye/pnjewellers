@@ -35,3 +35,4 @@ $_['column_comment']        = 'Comment';
 
 // Error
 $_['error_reorder']         = '%s is not currently available to be reordered.';
+$_['error_buy_reserved']    = '%s is not currently available for reservation.';
