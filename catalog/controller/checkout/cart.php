@@ -177,9 +177,6 @@ class ControllerCheckoutCart extends Controller {
 			
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$sort_order = array();
-				// if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
-				// 	$this->session->data['booking_method']['code'] = 'reserve';
-				// }	
 				$results = $this->model_setting_extension->getExtensions('total');
 
 				foreach ($results as $key => $value) {
@@ -344,11 +341,6 @@ class ControllerCheckoutCart extends Controller {
 
 				// Display prices
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					// if (isset($this->request->post['reserve']) && $this->request->post['reserve'] == 1 ) {
-					// 	$this->session->data['booking_method']['code'] = 'reserve';
-					// } else {
-					// 	$this->session->data['booking_method']['code'] = 'buy';
-					// }
 					$sort_order = array();
 
 					$results = $this->model_setting_extension->getExtensions('total');

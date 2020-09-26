@@ -45,13 +45,11 @@ class ControllerCommonColumnRight extends Controller {
 
 		$modules = $this->model_design_layout->getLayoutModules($layout_id, 'column_right');
 		
-		// print_r($modules);exit;
 		foreach ($modules as $module) {
 			$part = explode('.', $module['code']);
 
 			if (isset($part[0]) && $this->config->get('module_' . $part[0] . '_status')) {
 				$module_data = $this->load->controller('extension/module/' . $part[0]);
-				// print_r($module_data);exit;
 				if ($module_data) {
 					$data['modules'][] = $module_data;
 				}
@@ -69,7 +67,6 @@ class ControllerCommonColumnRight extends Controller {
 				}
 			}
 		}
-
 		return $this->load->view('common/column_right', $data);
 	}
 }

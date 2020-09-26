@@ -353,11 +353,6 @@ class ModelCheckoutOrder extends Model {
 						$this->model_account_customer->addTransaction($order_info['affiliate_id'], $this->language->get('text_order_id') . ' #' . $order_id, $order_info['commission'], $order_id);
 					}
 				}
-				// if( isset($this->session->data['booking_method']['code']) &&  $this->session->data['booking_method']['code'] == 'reserve') {
-				// 	// Add reservation if order is for a reservation of a product
-				// 	$this->load->model('account/reservation');
-				// 	$this->model_account_reservation->newReservation($order_id, $order_info['customer_id']);
-				// }
 			}
 
 			// Update the DB with the new statuses
@@ -398,15 +393,6 @@ class ModelCheckoutOrder extends Model {
 					$this->model_account_customer->deleteTransactionByOrderId($order_id);
 				}
 			}
-
-			#if order is reserved before then cancel this previous order give money back, to restock the quantity and proceed with new order.
-			// if(isset($this->session->data['reserved_order_id'])) {
-			// 	$reserved_order_id = $this->session->data['reserved_order_id'];
-			// 	unset($this->session->data['reserved_order_id']);
-			// 	$this->addOrderHistory($reserved_order_id, 11);
-			// 	$this->load->model('account/reservation');
-			// 	$this->model_account_reservation->completeReservation($reserved_order_id, array('status' => 1, 'order_id' => $order_id));
-			// }
 
 			$this->cache->delete('product');
 		}

@@ -1,7 +1,6 @@
 <?php
 class ModelExtensionTotalWallet extends Model {
 	public function getTotal($total) {
-		// print_r($this->session->data);exit;
 		$this->session->data['wallet'] = 0;
 		if(isset($this->session->data['payment_methods']['wallet']['balance'])){
 			$this->session->data['wallet'] = $this->session->data['payment_methods']['wallet']['balance'];
@@ -19,13 +18,6 @@ class ModelExtensionTotalWallet extends Model {
 					$price_total += $product['total'];
 				}
 			}
-			// if( isset($this->session->data['shipping_method']) 
-			// && isset($this->session->data['booking_method']['code'])
-			// && $this->session->data['booking_method']['code'] == 'buy' 
-			// ) {
-				// $price_total = $price_total + $this->session->data['shipping_method']['cost'];
-			// }
-			
 			if(  $price_total < $this->session->data['wallet'] ){
 				$discount_total = $price_total;	
 				$total['totals'][] = array(
@@ -44,13 +36,6 @@ class ModelExtensionTotalWallet extends Model {
 		$this->load->language('extension/total/wallet');
 
 		$points = 0;
-		// print_r($order_total);
-		// $start = strpos($order_total['title'], '(') + 1;
-		// $end = strrpos($order_total['title'], ')');
-
-		// if ($start && $end) {
-		// 	$points = substr($order_total['title'], $start, $end - $start);
-		// }
 		$points = $order_total['value'];
 		
 		$this->load->model('account/wallet');

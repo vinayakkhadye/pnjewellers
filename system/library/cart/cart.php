@@ -211,19 +211,6 @@ class Cart {
 					);
 				}
 
-				// Stock
-				// if ( isset($this->session->data['booking_method']['code'])
-				// 	&& $this->session->data['booking_method']['code'] == 'buy'
-				// 	&& isset($this->session->data['reserved_order_id'])
-				// 	&& !empty($this->session->data['reserved_order_id']) ) {
-
-				// 	$reserved_order_id = $this->session->data['reserved_order_id'];
-				// 	$product_reserved_query = $this->db->query("SELECT op.quantity FROM " . DB_PREFIX . "customer_reservation cr	INNER JOIN " . DB_PREFIX . "order_product op on cr.order_id =op.order_id WHERE  cr.order_id=" . $reserved_order_id . " and cr.customer_id = " . (int)$this->customer->getId() . " and cr.end_date >= now() and cr.status=0 and op.product_id= ". $product_query->row['product_id']);
-
-				// 	if(isset($product_reserved_query->row['quantity']) &&  $product_reserved_query->row['quantity'] > 0 ) {
-				// 		$product_query->row['quantity'] += $product_reserved_query->row['quantity'];
-				// 	}
-				// }
 				if($cart['reservation_order_id']) {
 					$reservation_order_id = $cart['reservation_order_id'];
 					$sql = "SELECT op.quantity FROM " . DB_PREFIX . "order_product op WHERE op.order_id=" . $reservation_order_id . " and op.reservation_end >= now() and op.reservation_status=0 and op.product_id= ". $product_query->row['product_id'];
@@ -435,11 +422,6 @@ class Cart {
 	}
 
 	public function hasShipping() {
-		// if (isset($this->session->data['booking_method']['code'])
-		// 	&& $this->session->data['booking_method']['code'] == 'reserve') {
-		// 	return false;
-		// }
-
 		foreach ($this->getProducts() as $product) {
 			if ($product['shipping']) {
 				return true;
