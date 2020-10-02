@@ -34,7 +34,7 @@
           <div class="panel-body">
             <div class="form-group">
               <label class="control-label" for="filter_customer_email">{{ entry_customer_email }}</label>
-              <input type="text" name="filter_customer_email" value="{{ filter_customer_email }}" placeholder="{{ entry_customer_email }}" id="filter_customer_email" class="form-control" />
+              <input type="text" name="filter_customer_email"  value="{{ filter_customer_email }}" placeholder="{{ entry_customer_email }}" id="filter_customer_email" class="form-control" />
             </div>
             <div class="form-group">
               <label class="control-label" for="filter_transaction_type">{{ entry_transaction_type }}</label>
@@ -158,6 +158,26 @@
       url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
     }
     location = url;
+  });
+
+  $('input[name=\'filter_customer_email\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_email=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['email'],
+              value: item['email']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      $('input[name=\'filter_customer_email\']').val(item['label']);
+    }
   });
   </script>
 

@@ -62,7 +62,7 @@ class ModelExtensionModuleWallet extends Model {
 			$implode[] = "wallet.transaction_type = '" . $this->db->escape($data['filter_transaction_type']) . "'";
 		}
 
-		if (is_numeric($data['filter_status'])) {
+		if (isset($data['filter_status']) && is_numeric($data['filter_status'])) {
 			$implode[] = "wallet.status = '" . $this->db->escape($data['filter_status']) . "'";
 		}
 
@@ -86,10 +86,10 @@ class ModelExtensionModuleWallet extends Model {
 			$sql .= " ORDER BY date_added";	
         }
         
-		if (isset($data['order']) && ($data['order'] == 'DESC')) {
-			$sql .= " DESC";
-		} else {
+		if (isset($data['order']) && ($data['order'] == 'ASC')) {
 			$sql .= " ASC";
+		} else {
+			$sql .= " DESC";
         }
         
 		if (isset($data['start']) || isset($data['limit'])) {
@@ -104,7 +104,8 @@ class ModelExtensionModuleWallet extends Model {
 			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 
 		}	
- 
+		// print_r($data);
+		// echo $sql;exit;
 		$query = $this->db->query($sql);
 		return $query->rows;
     }

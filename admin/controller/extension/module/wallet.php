@@ -209,7 +209,9 @@ class ControllerExtensionModuleWallet extends Controller {
 			'text'      => $this->language->get('text_add_credit'),
 		 	'href'      => $this->url->link('extension/module/wallet/add_credit', 'user_token=' . $this->session->data['user_token'], true)
 		);
-		
+
+		$data['user_token'] = $this->session->data['user_token'];
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -370,7 +372,7 @@ class ControllerExtensionModuleWallet extends Controller {
 	 
 		$data['breadcrumbs'][] = array(
 			'text'      => 'Transactions',
-		 	'href'      => $this->url->link('extension/module/wallet_transactions', 'user_token=' . $this->session->data['user_token'], true)
+		 	'href'      => $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'], true)
 		);
 
 
@@ -385,6 +387,37 @@ class ControllerExtensionModuleWallet extends Controller {
 		$htmlOutput = $this->load->view('extension/module/wallet_transaction', $data);
 		$this->response->setOutput($htmlOutput);
 	}
+
+	public function customer_transactions() {
+		$json = array();
+
+		if (isset($this->request->get['filter_customer_email'])) {
+			$filter_customer_email = $this->request->get['filter_customer_email'];
+		} else {
+			$filter_customer_email = '';
+		}
+
+		if (isset($this->request->get['limit'])) {
+			$limit = $this->request->get['limit'];
+		} else {
+			$limit = '';
+		}
+
+		$this->load->model('extension/module/wallet');
+
+		$filter_data = array(
+			'filter_customer_email' => $filter_customer_email,
+			'start' => 0,
+			'limit' => $limit
+		);
+
+		$json = $this->model_extension_module_wallet->getTransactions($filter_data);
+
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	
     public function install() {
 		if (!$this->user->hasPermission('modify', 'extension/extension/module')) {
