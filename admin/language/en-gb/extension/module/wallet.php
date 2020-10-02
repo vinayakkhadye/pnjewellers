@@ -32,4 +32,13 @@ $_['entry_sort_order']   = 'Sort Order';
 // Help
 $_['help_total']         = 'The checkout total the order must reach before this payment method becomes active.';
 
+// Fliter
+$_['text_filter'] = "Filter";
+$_['entry_customer_email'] = "Customet Email";
+$_['entry_transaction_type'] = "Transaction Type";
+$_['entry_date_added'] = "Date Added";
+
+// Column
+$_['column_date_added'] = "Date Added";
+
 ?>

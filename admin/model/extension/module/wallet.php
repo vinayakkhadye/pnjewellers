@@ -19,19 +19,65 @@ class ModelExtensionModuleWallet extends Model {
 		$this->db->query("UPDATE " . DB_PREFIX . "wallet SET store_id = '" . (int)$data['store_id'] . "', customer_id = '" . $this->db->escape($data['customer_id']) . "', amount = '" . $this->db->escape($data['amount']) . "', status = '" . $this->db->escape($data['status']) . "'WHERE wallet_id = '" . (int)$wallet_id . "'");
     }
 
-	public function getTotalTransactions() {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "wallet");
-	  
-	  return $query->row['total'];
+	public function getTotalTransactions($data) {
+        $sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "wallet` as wallet LEFT JOIN `" . DB_PREFIX . "customer` as customer on wallet.customer_id = customer.customer_id  ";
+
+		$implode = array();
+		if (!empty($data['filter_customer_email'])) {
+			$implode[] = "customer.email LIKE '%" . $this->db->escape($data['filter_customer_email']) . "%'";
+		}
+
+		if (!empty($data['filter_transaction_type'])) {
+			$implode[] = "wallet.transaction_type = '" . $this->db->escape($data['filter_transaction_type']) . "'";
+		}
+
+		if (is_numeric($data['filter_status'])) {
+			$implode[] = "wallet.status = '" . $this->db->escape($data['filter_status']) . "'";
+		}
+
+		if (!empty($data['filter_date_added'])) {
+			$implode[] = "DATE(wallet.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+		}
+
+
+		if ($implode) {
+			$sql .= " WHERE " . implode(" AND ", $implode);
+		}
+		$query = $this->db->query($sql);
+
+	  	return $query->row['total'];
   	}
 
     public function getTransactions($data)
     {
         $sql = "SELECT customer.email, wallet.* FROM `" . DB_PREFIX . "wallet` as wallet LEFT JOIN `" . DB_PREFIX . "customer` as customer on wallet.customer_id = customer.customer_id  ";
-        
+
+		$implode = array();
+
+		if (!empty($data['filter_customer_email'])) {
+			$implode[] = "customer.email LIKE '%" . $this->db->escape($data['filter_customer_email']) . "%'";
+		}
+
+		if (!empty($data['filter_transaction_type'])) {
+			$implode[] = "wallet.transaction_type = '" . $this->db->escape($data['filter_transaction_type']) . "'";
+		}
+
+		if (is_numeric($data['filter_status'])) {
+			$implode[] = "wallet.status = '" . $this->db->escape($data['filter_status']) . "'";
+		}
+
+		if (!empty($data['filter_date_added'])) {
+			$implode[] = "DATE(wallet.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+		}
+
+		if ($implode) {
+			$sql .= " WHERE " . implode(" AND ", $implode);
+		}
         $sort_data = array(
-            'date_added',
-			'transaction_type'
+			'date_added',
+			'transaction_type',
+			'customer.email',
+			'status',
         );	
         
         if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
@@ -57,9 +103,9 @@ class ModelExtensionModuleWallet extends Model {
 		
 			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 
-        }	
-        $query = $this->db->query($sql);
-
+		}	
+ 
+		$query = $this->db->query($sql);
 		return $query->rows;
     }
 
