@@ -25,6 +25,61 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+    <div class="row">
+      <div id="filter-customer" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="control-label" for="filter_customer_email">{{ entry_customer_email }}</label>
+              <input type="text" name="filter_customer_email"  value="{{ filter_customer_email }}" placeholder="{{ entry_customer_email }}" id="filter_customer_email" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="filter_transaction_type">{{ entry_transaction_type }}</label>
+              <select name="filter_transaction_type" id="filter_transaction_type" class="form-control">
+                <option value=""></option>
+                {% for transaction_type in transaction_types %}
+                {% if transaction_type == filter_transaction_type %}
+                <option value="{{ transaction_type }}" selected="selected">{{ transaction_type  | capitalize }}</option>
+                {% else %}
+                <option value="{{ transaction_type }}">{{ transaction_type | capitalize  }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="filter_status">{{ entry_status }}</label>
+              <select name="filter_status" id="filter_status" class="form-control">
+                <option value=""></option>
+                {% for status_value, status_label in status_types %}
+                {% if status_value is same as(filter_status) %}
+                <option value="{{ status_value }}" selected="selected">{{ status_label | capitalize  }}</option>
+                {% else %}
+                <option value="{{ status_value }}">{{ status_label | capitalize  }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label" for="input-date-added">{{ entry_date_added }}</label>
+              <div class="input-group date">
+                <input type="text" name="filter_date_added" value="{{ filter_date_added }}" placeholder="{{ entry_date_added }}" data-date-format="YYYY-MM-DD" id="input-date-added" class="form-control" />
+                <span class="input-group-btn">
+                <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                </span>
+              </div>
+            </div>
+            <div class="form-group text-right">
+              <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    <div class="col-md-9 col-md-pull-3 col-sm-12">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-list"></i> All Transactions</h3>
@@ -36,13 +91,12 @@
 				    <thead>
 				      <tr>
                 <td width="1" style="text-align: center;">id</td>
-                <td class="text-left">
-                  customer email
-                </td>
-                <td class="text-left">transaction type</td>
-                <td class="text-left">status</td>
-                <td class="text-left">amount</td>
-                <td class="text-left">added on</td>
+                <td class="text-left"><a href="{{sort_customer_email}}" >Customer Email</a></td>
+                <td class="text-left"><a href="{{sort_transaction_type}}" >Transaction Type</a></td>
+                <td class="text-left"><a href="{{sort_status}}" >Status</a></td>
+                <td class="text-left"> amount</td>
+                <td class="text-left">{% if sort == 'date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }}">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}">{{ column_date_added }}</a>{% endif %}</td>
+
               </tr>
             </thead>
 				    <tbody>
@@ -59,7 +113,7 @@
                 {% endfor %}
               {% else %}   
                 <tr>
-                <td class="text-center" colspan="5">{{ text_no_results }}</td>
+                <td class="text-center" colspan="6">{{ text_no_results }}</td>
                 </tr>
               {% endif %}
 				    </tbody>
@@ -71,7 +125,61 @@
 
       </div>
     </div>
+    </div>
+    </div>
   </div>
+
+    <script type="text/javascript">
+  $('.date').datetimepicker({
+    language: '{{ datepicker }}',
+    pickTime: false
+  });
+  
+  $('#button-filter').on('click', function() {
+    url = 'index.php?route=extension/module/wallet/transactions&user_token={{ user_token }}';
+
+    var filter_customer_email = $('input[name=\'filter_customer_email\']').val();
+    if (filter_customer_email) {
+      url += '&filter_customer_email=' + encodeURIComponent(filter_customer_email);
+    }
+
+    var filter_transaction_type = $('select[name=\'filter_transaction_type\']').val();
+    if (filter_transaction_type !== '') {
+      url += '&filter_transaction_type=' + encodeURIComponent(filter_transaction_type);
+    }
+
+    var filter_status = $('select[name=\'filter_status\']').val();
+    if (filter_status !== '') {
+      url += '&filter_status=' + encodeURIComponent(filter_status);
+    }
+
+    var filter_date_added = $('input[name=\'filter_date_added\']').val();
+    if (filter_date_added) {
+      url += '&filter_date_added=' + encodeURIComponent(filter_date_added);
+    }
+    location = url;
+  });
+
+  $('input[name=\'filter_customer_email\']').autocomplete({
+    'source': function(request, response) {
+      $.ajax({
+        url: 'index.php?route=customer/customer/autocomplete&user_token={{ user_token }}&filter_email=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['email'],
+              value: item['email']
+            }
+          }));
+        }
+      });
+    },
+    'select': function(item) {
+      $('input[name=\'filter_customer_email\']').val(item['label']);
+    }
+  });
+  </script>
 
 </div>
 {{ footer }}

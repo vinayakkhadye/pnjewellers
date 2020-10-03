@@ -209,7 +209,9 @@ class ControllerExtensionModuleWallet extends Controller {
 			'text'      => $this->language->get('text_add_credit'),
 		 	'href'      => $this->url->link('extension/module/wallet/add_credit', 'user_token=' . $this->session->data['user_token'], true)
 		);
-		
+
+		$data['user_token'] = $this->session->data['user_token'];
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -224,56 +226,136 @@ class ControllerExtensionModuleWallet extends Controller {
 		/** page title */
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		/** if session has success message then set to data unset sessioin success message */
+		/** filters */
+		if (isset($this->request->get['filter_customer_email'])) {
+			$filter_customer_email = $this->request->get['filter_customer_email'];
+		} else {
+			$filter_customer_email = '';
+		}
+
+		if (isset($this->request->get['filter_date_added'])) {
+			$filter_date_added = $this->request->get['filter_date_added'];
+		} else {
+			$filter_date_added = '';
+		}
+
+		if (isset($this->request->get['filter_status'])) {
+			$filter_status = $this->request->get['filter_status'];
+		} else {
+			$filter_status = '';
+		}
+
+		if (isset($this->request->get['filter_transaction_type'])) {
+			$filter_transaction_type = $this->request->get['filter_transaction_type'];
+		} else {
+			$filter_transaction_type = '';
+		}
+
+		if (isset($this->request->get['sort'])) {
+			$sort = $this->request->get['sort'];
+		} else {
+			$sort = 'date_added';
+		}
+		if (isset($this->request->get['order'])) {
+			$order = $this->request->get['order'];
+		} else {
+			$order = 'DESC';
+		}
+
+		if (isset($this->request->get['page'])) {
+			$page = $this->request->get['page'];
+		} else {
+			$page = 1;
+		}
+		
+		$this->load->model('extension/module/wallet');
+		$filter_data = array(
+			'filter_customer_email' => $filter_customer_email,
+			'filter_status' => $filter_status,
+			'filter_date_added' => $filter_date_added,
+			'filter_transaction_type' => $filter_transaction_type,
+			'sort' => $sort,
+			'order' => $order,
+			'page' => $page,
+			'start' => $this->config->get('config_limit_admin') * ($page - 1),
+			'limit' => $this->config->get('config_limit_admin')
+		);
+
+		$data['transactions'] = $this->model_extension_module_wallet->getTransactions($filter_data);
+		$total_transactions = $this->model_extension_module_wallet->getTotalTransactions($filter_data);
+
+		$data['user_token'] = $this->session->data['user_token'];
+
+		if (isset($this->error['warning'])) {
+			$data['error_warning'] = $this->error['warning'];
+		} else {
+			$data['error_warning'] = '';
+		}
+
 		$data['success'] = '';
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
 			unset($this->session->data['success']);
 		}
 
-		/** set sorting order and default page number */
-		$sort = 'date_added';
-		if (isset($this->request->get['sort'])) {
-			$sort = $this->request->get['sort'];
-		}
-		$order = 'DESC';
-		if (isset($this->request->get['order'])) {
-			$order = $this->request->get['order'];
-		}
-		$page = 1;
-		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+		$filter_url = '';
+		if (isset($this->request->get['filter_customer_email'])) {
+			$filter_url .= '&filter_customer_email=' . urlencode(html_entity_decode($this->request->get['filter_customer_email'], ENT_QUOTES, 'UTF-8'));
 		}
 
-		$data = array(
-			'sort'		=> $sort,
-			'order'		=> $order,
-			'page'		=> $page,
-			'start'		=> $this->config->get('config_limit_admin') * ($page - 1),
-			'limit'		=> $this->config->get('config_limit_admin')
-		);
-		$this->load->model('extension/module/wallet');
-		$data['transactions'] = $this->model_extension_module_wallet->getTransactions($data);
+		if (isset($this->request->get['filter_date_added'])) {
+			$filter_url .= '&filter_date_added=' . urlencode(html_entity_decode($this->request->get['filter_date_added'], ENT_QUOTES, 'UTF-8'));
+		}
 
+		if (isset($this->request->get['filter_status'])) {
+			$filter_url .= '&filter_status=' . urlencode(html_entity_decode($this->request->get['filter_status'], ENT_QUOTES, 'UTF-8'));
+		}
 
-		$url = '';
+		if (isset($this->request->get['filter_transaction_type'])) {
+			$filter_url .= '&filter_transaction_type=' . urlencode(html_entity_decode($this->request->get['filter_transaction_type'], ENT_QUOTES, 'UTF-8'));
+		}
 		
+		$url = $filter_url;
+
+		if ($order == 'ASC') {
+			$url .= '&order=DESC';
+		} else {
+			$url .= '&order=ASC';
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
+	
+		$data['sort_customer_email'] = $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'] . '&sort=customer_email' . $url, true);
+
+		$data['sort_status'] = $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url, true);
+		
+		$data['sort_transaction_type'] = $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'] . '&sort=transaction_type' . $url, true);
+
+		$data['sort_date_added'] = $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'] . '&sort=date_added' . $url, true);
+
+		$url = $filter_url;
+
 		if (isset($this->request->get['sort'])) {
 			$url .= '&sort=' . $this->request->get['sort'];
 		}
-		
+
 		if (isset($this->request->get['order'])) {
 			$url .= '&order=' . $this->request->get['order'];
 		}
-		
-		
+
 		$pagination = new Pagination();
-		$pagination->total = $this->model_extension_module_wallet->getTotalTransactions();
+		$pagination->total = $total_transactions;
 		$pagination->page = $page;
 		$pagination->limit = $this->config->get('config_limit_admin');
 		$pagination->url = $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', true);
 		$data['pagination'] = $pagination->render();
 		
+		$data['filter_customer_email'] = $filter_customer_email;
+		$data['filter_transaction_type'] = $filter_transaction_type;
+		$data['filter_status'] = is_numeric($filter_status)  ? (int)$filter_status:$filter_status;
+		$data['filter_date_added'] = $filter_date_added;
 
 		/** page breadcrumbs */
 		$data['breadcrumbs'] = array();
@@ -290,16 +372,52 @@ class ControllerExtensionModuleWallet extends Controller {
 	 
 		$data['breadcrumbs'][] = array(
 			'text'      => 'Transactions',
-		 	'href'      => $this->url->link('extension/module/wallet_transactions', 'user_token=' . $this->session->data['user_token'], true)
+		 	'href'      => $this->url->link('extension/module/wallet/transactions', 'user_token=' . $this->session->data['user_token'], true)
 		);
 
+
+		$data['transaction_types'] = array('credit','debit');
+		$data['status_types'] = array(0 => "inactive", 1 => "active");
+		
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 		
+
 		$htmlOutput = $this->load->view('extension/module/wallet_transaction', $data);
 		$this->response->setOutput($htmlOutput);
 	}
+
+	public function customer_transactions() {
+		$json = array();
+
+		if (isset($this->request->get['filter_customer_email'])) {
+			$filter_customer_email = $this->request->get['filter_customer_email'];
+		} else {
+			$filter_customer_email = '';
+		}
+
+		if (isset($this->request->get['limit'])) {
+			$limit = $this->request->get['limit'];
+		} else {
+			$limit = '';
+		}
+
+		$this->load->model('extension/module/wallet');
+
+		$filter_data = array(
+			'filter_customer_email' => $filter_customer_email,
+			'start' => 0,
+			'limit' => $limit
+		);
+
+		$json = $this->model_extension_module_wallet->getTransactions($filter_data);
+
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	
     public function install() {
 		if (!$this->user->hasPermission('modify', 'extension/extension/module')) {

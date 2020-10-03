@@ -79,8 +79,8 @@
               {% for option in product.option %} <br />
               &nbsp;<small> - {{ option.name }}: {{ option.value }}</small> {% endfor %}</td>
             <td class="text-left">{{ product.model }}</td>
-            <td class="text-right">
-            {% if product.is_reserved and product.reservation_status == 1 %}
+            <td class="text-right" id="order_product_quantity_{{product.order_product_id}}">
+            {% if product.is_reserved and (product.reservation_status == 1 or product.quantity == 0 )  %}
             Reservation quantity Used
             {% else %}
             {{ product.quantity }}
@@ -90,17 +90,21 @@
             <td class="text-right">{{ product.total }}</td>
             <td class="text-right" style="white-space: nowrap;">
             {% if product.is_reserved %}
-            {% if product.reservation_status == 1 %}
-            <a href="javascript:;" data-toggle="tooltip" title="Reservation Complete" class="btn btn-primary" ><i class="fa fa-check"></i></a>
-            {% else %}
-            <a href="{{ product.buy_reserved }}" data-toggle="tooltip" title="{{ button_buy_reserved }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a>
 
-            {% endif %} 
+            {% if product.reservation_status == 1  or product.quantity == 0 %}
+            <a id="order_product_{{product.order_product_id}}" href="javascript:;" data-toggle="tooltip" title="Reservation Complete" class="btn btn-primary" ><i class="fa fa-check"></i></a>
             {% else %}
+            <a id="order_product_{{product.order_product_id}}" href="javascript:;" data-toggle="tooltip" title="{{ button_buy_reserved }}" class="btn btn-primary" onclick="reserve.buy('{{ product.order_id }}', '{{ product.order_product_id }}');" ><i class="fa fa-shopping-cart"></i></a>
+            {% endif %} 
+            
+            {% else %}
+            
             {% if product.reorder %} 
             <a href="{{ product.reorder }}" data-toggle="tooltip" title="{{ button_reorder }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></a> 
             {% endif %} 
+            
             <a href="{{ product.return }}" data-toggle="tooltip" title="{{ button_return }}" class="btn btn-danger"><i class="fa fa-reply"></i></a>
+            
             {% endif %}
             </td>
           </tr>

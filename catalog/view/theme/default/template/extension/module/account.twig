@@ -9,8 +9,11 @@
   {% if logged %}
   <a href="{{ edit }}" class="list-group-item">{{ text_edit }}</a> 
   <a href="{{ password }}" class="list-group-item">{{ text_password }}</a>
+  
+  {% if wallet %}
   <a href="{{ wallet }}" class="list-group-item ">{{text_wallet}}</a>
-  {# <a href="{{ reservation }}" class="list-group-item">{{text_reservation}}</a> #}
+  {% endif %}
+
   {% endif %}
 
   <a href="{{ address }}" class="list-group-item">{{ text_address }}</a>

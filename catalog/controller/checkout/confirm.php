@@ -78,27 +78,9 @@ class ControllerCheckoutConfirm extends Controller {
 
 			array_multisort($sort_order, SORT_ASC, $results);
 
-			// on reserving a product allow only 5 percent fees of total quantity.
-			// $booking_code = $this->session->data['booking_method']['code'];
-			// $reserveAllowedTotals = array('sub_total', 'wallet', 'total'); # should be put in config
-			// $total_key = 0;
-			// $reserve_perc = 0.05;
 			foreach ($results as $result) {
 				if ($this->config->get('total_' . $result['code'] . '_status')) {
 					$this->load->model('extension/total/' . $result['code']);
-					// We have to put the totals in an array so that they pass by reference.
-					// echo 'model_extension_total_' . $result['code'] . "<br/>";
-					// if( $booking_code == 'reserve' ) {
-					// 	if (in_array($result['code'], $reserveAllowedTotals)){
-					// 		$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
-					// 		if($result['code'] != 'total'){
-					// 			$total_value = $total_data['totals'][$total_key]['value'];
-					// 			$total_data['totals'][$total_key]['value'] = $total_value  * $reserve_perc;
-					// 			$total_key++;
-					// 		}
-  					// 	}
-					// 	continue;
-					// }
 					$this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
 				}
 			}

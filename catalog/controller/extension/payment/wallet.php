@@ -11,10 +11,6 @@ class ControllerExtensionPaymentWallet extends Controller {
 			$this->load->model('checkout/order');
 			$this->load->model('account/wallet');
 
-			// get order information
-			// if(isset($this->session->data['reserved_order_id'])){
-			// 	$reserved_order_id = $this->session->data['reserved_order_id'];
-			// }
 			$order_id = $this->session->data['order_id'];
 			$order_info = $this->model_checkout_order->getOrder($order_id);
 
@@ -25,19 +21,6 @@ class ControllerExtensionPaymentWallet extends Controller {
 
 			$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_wallet_order_status_id'));
 
-			// $products = $this->cart->getProducts();
-			// print_r($products); exit;
-
-
-			// if(isset($reserved_order_id)) {
-			// 	$reserve_order_info = $this->model_checkout_order->getOrder($reserved_order_id);
-
-			// 	$desc = $this->db->escape(sprintf($this->language->get('text_order_id'), (int)$reserve_order_info['order_id']));
-			// 	$total = $reserve_order_info['total'];
-
-			// 	$this->model_account_wallet->credit($reserve_order_info['customer_id'], $reserve_order_info['order_id'], $desc, $total);
-			// }
-
 			$order_products = $this->model_checkout_order->getOrderProducts($order_id);
 			foreach ($order_products as $order_product) {
 				if($order_product['reservation_order_id'] > 0 ) {
@@ -47,12 +30,13 @@ class ControllerExtensionPaymentWallet extends Controller {
 						$total = $reserve_order_product['price'] * $order_product['quantity'];
 		
 						$this->model_account_wallet->credit($order_info['customer_id'], $reserve_order_product['order_id'], $desc, $total);						
-
-						$this->model_checkout_order->addOrderHistory($reserve_order_product['order_id'],11);
+						$refund_status = 11;
+						$comment = "₹". $total . " credited for buying ".$order_product['quantity'] ." reserved product(s).";
+						$this->model_checkout_order->addOrderHistory($reserve_order_product['order_id'], $refund_status, $comment, true);
 
 						if($reserve_order_product['quantity'] > $order_product['quantity'] ){
 							$reserve_order_product_quantity = $reserve_order_product['quantity'] - $order_product['quantity'];
-							$reserve_order_product_status = 3; # partial buy of reserved produc 
+							$reserve_order_product_status = 3; # partial buy of reserved product 
 						} else {
 							$reserve_order_product_quantity = 0; # all reservations exausted 
 							$reserve_order_product_status = 1; # complete buy

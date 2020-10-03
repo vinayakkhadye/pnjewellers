@@ -26,6 +26,7 @@ class ControllerCommonCart extends Controller {
 				$sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
 			}
 
+
 			array_multisort($sort_order, SORT_ASC, $results);
 
 			foreach ($results as $result) {
