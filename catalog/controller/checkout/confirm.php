@@ -319,6 +319,10 @@ class ControllerCheckoutConfirm extends Controller {
 
 			$this->load->model('checkout/order');
 			
+			if(isset($this->session->data['product_address_mapping'])){
+				$order_data['product_address_mapping'] = $this->session->data['product_address_mapping'];
+			}
+			
 			$this->session->data['order_id'] = $this->model_checkout_order->addOrder($order_data);
 			$this->load->model('tool/upload');
 

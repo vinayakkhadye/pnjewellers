@@ -902,6 +902,49 @@ class ControllerSaleOrder extends Controller {
 
 			$data['shipping_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
 
+			$order_address_info = $this->db->query("SELECT  distinct oa.*, opa.order_product_id, op.name as product_name"
+			. " FROM oc_order_product_address opa"
+			. " INNER JOIN oc_order_product op ON opa.order_product_id = op.order_product_id"
+			. " INNER JOIN oc_address oa ON opa.address_id = oa.address_id" 
+			. " WHERE opa.order_id = ". $order_id);
+
+			if($order_address_info->num_rows > 0) {
+				$format = '<b>{product_name}</b> -  {firstname} {lastname}' . "\n" . '{company}' . "\n" . '{address_1}' . "\n" . '{address_2}' . "\n" . '{city} {postcode}';
+				# . "\n" . '{zone}' . "\n" . '{country}
+	
+				$find = array(
+					'{product_name}',
+					'{firstname}',
+					'{lastname}',
+					'{company}',
+					'{address_1}',
+					'{address_2}',
+					'{city}',
+					'{postcode}',
+					'{zone}',
+					'{zone_code}',
+					'{country}'
+				);
+		
+				foreach($order_address_info->rows as $address_info){
+					$replace = array(
+						'product_name' => $address_info['product_name'],
+						'firstname' => $address_info['firstname'],
+						'lastname'  => $address_info['lastname'],
+						'company'   => $address_info['company'],
+						'address_1' => $address_info['address_1'],
+						'address_2' => $address_info['address_2'],
+						'city'      => $address_info['city'],
+						'postcode'  => $address_info['postcode'],
+						// 'zone'      => $address_info['shipping_zone'],
+						// 'zone_code' => $address_info['shipping_zone_code'],
+						// 'country'   => $address_info['shipping_country']
+					);
+		
+					
+					$data['multiple_address'][$address_info['address_id']] =  str_replace(array("\r\n", "\r", "\n"), ', ', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), ' ', trim(str_replace($find, $replace, $format))));
+				}
+			}
 			// Uploaded files
 			$this->load->model('tool/upload');
 

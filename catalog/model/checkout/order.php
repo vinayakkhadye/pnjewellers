@@ -22,6 +22,16 @@ class ModelCheckoutOrder extends Model {
 				foreach ($product['option'] as $option) {
 					$this->db->query("INSERT INTO " . DB_PREFIX . "order_option SET order_id = '" . (int)$order_id . "', order_product_id = '" . (int)$order_product_id . "', product_option_id = '" . (int)$option['product_option_id'] . "', product_option_value_id = '" . (int)$option['product_option_value_id'] . "', name = '" . $this->db->escape($option['name']) . "', `value` = '" . $this->db->escape($option['value']) . "', `type` = '" . $this->db->escape($option['type']) . "'");
 				}
+
+				if(isset($data['product_address_mapping']) && isset($data['product_address_mapping'][$product['product_id']]) ) {
+					foreach($data['product_address_mapping'][$product['product_id']] as $key => $addr_qty){
+						$product_address_id = $addr_qty['address_id'];
+						$product_address_qty = $addr_qty['quantity'];
+	
+						$this->db->query("INSERT INTO " . DB_PREFIX . "order_product_address SET order_id = '" . (int)$order_id . "', order_product_id = '" . (int)$order_product_id . "', address_id = '" . (int)$product_address_id . "', quantity = '" . (int)$product_address_qty . "', date_added = NOW(), date_modified = NOW()");
+	
+					}
+				}
 			}
 		}
 

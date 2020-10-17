@@ -109,7 +109,6 @@ class ControllerCheckoutShippingAddress extends Controller {
 				break;
 			}
 		}
-
 		if (!$json) {
 			$this->load->model('account/address');
 			
@@ -129,10 +128,13 @@ class ControllerCheckoutShippingAddress extends Controller {
 			}	
 			else if (isset($this->request->post['shipping_address']) && $this->request->post['shipping_address'] == 'multiple') {
 				if ( isset($this->request->post['address_id']) && sizeof ($this->request->post['address_id']) > 0 ) {
-					$this->session->data['product_address_mapping'] = $this->request->post['address_id']; 
-					foreach($this->request->post['address_id'] as $pr_id => $addr_id){
-						$this->session->data['product_address_mapping'][$pr_id] = array("address_id"=>$addr_id, 
-						"quantity"=> $this->request->post['product_quantity'][$pr_id]);
+					unset($this->session->data['product_address_mapping']);
+					foreach($this->request->post['address_id'] as $key => $addr_prod_id){
+						foreach($addr_prod_id as $pr_id=>$addr_id){
+							$this->session->data['product_address_mapping'][$pr_id][$key] = array("address_id"=>$addr_id, 
+							"quantity"=> $this->request->post['product_quantity'][$key][$pr_id]);
+	
+						}
 					}
 				}
 			} else {
@@ -186,7 +188,9 @@ class ControllerCheckoutShippingAddress extends Controller {
 				if (!$json) {
 					$address_id = $this->model_account_address->addAddress($this->customer->getId(), $this->request->post);
 					
-					$this->session->data['shipping_address'] = $this->model_account_address->getAddress($address_id);
+					$json['shipping_address'] = $this->session->data['shipping_address'] = $this->model_account_address->getAddress($address_id);
+					$json['shipping_address_id'] = $address_id;
+					$json['product_id'] = $this->request->post['product_id'];
 
 					// If no default address ID set we use the last address
 					if (!$this->customer->getAddressId()) {

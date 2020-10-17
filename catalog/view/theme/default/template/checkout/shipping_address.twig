@@ -23,10 +23,14 @@
   </div>
   <div id="shipping-multiple-existing" style="display:none">
 
-  {% for product in products %}
-      <input type="text" name="product_quantity[{{product.id}}]" value="{{product.quantity}}" readonly />
-      <img src="{{ product.image }}" alt="{{product.name}}">
-      <select name="address_id[{{product.id}}]" class="form-control">
+  {% for key, product in products %}
+      {% if 'Reserve' not in product.name %}
+      <br />
+      <label><b>{{ product.name }}</b></label>
+      <br />
+      <input type="hidden" class="form-control" name="product_quantity[{{key}}][{{product.id}}]" value="{{product.quantity}}" />
+      <img class="img-thumbnail" style="margin-bottom:1em;margin-top:1em" src="{{ product.image }}" alt="{{product.name}}">
+      <select name="address_id[{{key}}][{{product.id}}]" id="address_product_{{key}}_{{product.id}}" class="form-control">
         {% for address in addresses %}
         {% if address.address_id == address_id %}
         <option value="{{ address.address_id }}" selected="selected">{{ address.firstname }} {{ address.lastname }}, {{ address.address_1 }}, {{ address.city }}, {{ address.zone }}, {{ address.country }}</option>
@@ -35,7 +39,10 @@
         {% endif %}
         {% endfor %}  
       </select>
-      {# <button data-toggle="modal" data-target="#id01" class="btn btn-primary btn-sm" type="button" id="add-address-button" name="add-address-button">Add New</button> #}
+      <br />
+      <button data-toggle="modal" data-target="#new_address_form" data-productid="{{key}}_{{product.id}}" class="btn btn-primary btn-sm new_address_modal" type="button">Add New</button>
+      <hr />
+      {% endif %}
   {% endfor %}
 
   </div>
@@ -227,18 +234,25 @@
   </div>
 </form>
 
-<div id="id01" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
+<div id="new_address_form" class="modal fade in" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <b> New Address Form </b>
+          <div class="clearfix">
+            <div class="pull-left">
+              <b> New Address Form </b>
+            </div>
+            <div class="pull-right">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-close"></i></button>
+            </div>
+          </div>
       </div>
       <div class="modal-body">
         <form id="new-address-form" onsubmit="return false" class="form-horizontal" method="post">
-          
           <div class="form-group required">
             <label class="col-sm-4 control-label" for="input-multi-shipping-firstname">{{ entry_firstname }}</label>
             <div class="col-sm-8">
+              <input type="hidden" id="selected_address" name="product_id" />
               <input type="text" name="firstname" value="" placeholder="{{ entry_firstname }}" id="input-multi-shipping-firstname" class="form-control" />
             </div>
           </div>
@@ -300,16 +314,23 @@
               </select>
             </div>
           </div>
-          <button data-dismiss="modal" class="btn btn-primary" type="button" id="submit-address-button" name="submit-address-button">Submit</button>
+          <div class="buttons clearfix">
+            <div class="pull-right">
+              <button data-dismiss="modal" class="btn btn-primary" type="button" id="submit-address-button" name="submit-address-button">Submit</button>
+            </div>
+          </div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
 <script type="text/javascript"><!--
+$(document).ready(function () {
+    $(".new_address_modal").click(function () {
+        $('#selected_address').val($(this).data('productid'));
+    });
+});
+
 $('input[name=\'shipping_address\']').on('change', function() {
 	if (this.value == 'new') {
 		$('#shipping-existing').hide();

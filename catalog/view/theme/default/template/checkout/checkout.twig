@@ -446,7 +446,7 @@ $(document).delegate('#submit-address-button', 'click', function(e) {
     $.ajax({
         url: 'index.php?route=checkout/shipping_address/save',
         type: 'post',
-        data: $('#new-address-form input[type=\'text\'], #new-address-form input[type=\'number\'], #new-address-form input[type=\'date\'], #new-address-form input[type=\'datetime-local\'], #new-address-form input[type=\'time\'], #new-address-form input[type=\'password\'], #new-address-form input[type=\'checkbox\']:checked, #new-address-form input[type=\'radio\']:checked, #new-address-form textarea, #new-address-form select'),
+        data: $('#new-address-form input[type=\'text\'], #new-address-form input[type=\'hidden\'], #new-address-form input[type=\'number\'], #new-address-form input[type=\'date\'], #new-address-form input[type=\'datetime-local\'], #new-address-form input[type=\'time\'], #new-address-form input[type=\'password\'], #new-address-form input[type=\'checkbox\']:checked, #new-address-form input[type=\'radio\']:checked, #new-address-form textarea, #new-address-form select'),
         dataType: 'json',
         beforeSend: function() {
 			$('#submit-address-button').button('loading');
@@ -458,11 +458,9 @@ $(document).delegate('#submit-address-button', 'click', function(e) {
                 location = json['redirect'];
             } else if (json['error']) {
                 $('#submit-address-button').button('reset');
-
                 if (json['error']['warning']) {
                     $('#new-address-form .panel-body').prepend('<div class="alert alert-warning alert-dismissible">' + json['error']['warning'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
                 }
-
 				for (i in json['error']) {
 					var element = $('#input-multi-shipping-' + i.replace('_', '-'));
 
@@ -472,9 +470,17 @@ $(document).delegate('#submit-address-button', 'click', function(e) {
 						$(element).after('<div class="text-danger">' + json['error'][i] + '</div>');
 					}
 				}
-
 				// Highlight any found errors
 				$('.text-danger').parent().parent().addClass('has-error');
+            } else if (json['shipping_address']) {
+                var shipping_address = json['shipping_address'];
+                optionValue = shipping_address['address_id'];
+
+                optionText = Object.values(shipping_address).join(", ");
+                
+                optionAddress = new Option(optionText, optionValue);
+                optionAddress.setAttribute("selected", "selected");
+                $('#address_product_' + json['product_id']).append(optionAddress);
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
@@ -488,7 +494,7 @@ $(document).delegate('#button-shipping-address', 'click', function() {
     $.ajax({
         url: 'index.php?route=checkout/shipping_address/save',
         type: 'post',
-        data: $('#collapse-shipping-address input[type=\'text\'], #collapse-shipping-address input[type=\'date\'], #collapse-shipping-address input[type=\'datetime-local\'], #collapse-shipping-address input[type=\'time\'], #collapse-shipping-address input[type=\'password\'], #collapse-shipping-address input[type=\'checkbox\']:checked, #collapse-shipping-address input[type=\'radio\']:checked, #collapse-shipping-address textarea, #collapse-shipping-address select'),
+        data: $('#collapse-shipping-address input[type=\'text\'], #collapse-shipping-address input[type=\'hidden\'], #collapse-shipping-address input[type=\'date\'], #collapse-shipping-address input[type=\'datetime-local\'], #collapse-shipping-address input[type=\'time\'], #collapse-shipping-address input[type=\'password\'], #collapse-shipping-address input[type=\'checkbox\']:checked, #collapse-shipping-address input[type=\'radio\']:checked, #collapse-shipping-address textarea, #collapse-shipping-address select'),
         dataType: 'json',
         beforeSend: function() {
 			$('#button-shipping-address').button('loading');

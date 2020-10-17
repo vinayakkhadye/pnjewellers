@@ -39,8 +39,16 @@ class ModelAccountOrder extends Model {
 				$shipping_zone_code = '';
 			}
 
+			$order_product_query = $this->db->query("SELECT distinct oa.* FROM `" . DB_PREFIX . "order_product_address` opa  
+			inner join oc_address oa on opa.address_id = oa.address_id WHERE opa.order_id = '" . (int)$order_id . "'");
+			
+			if ($order_product_query->num_rows > 0){
+				$multiple_address = $order_product_query->rows;
+			}
+
 			return array(
 				'order_id'                => $order_query->row['order_id'],
+				'multiple_address'		  => isset($multiple_address) ? $multiple_address : null,
 				'invoice_no'              => $order_query->row['invoice_no'],
 				'invoice_prefix'          => $order_query->row['invoice_prefix'],
 				'store_id'                => $order_query->row['store_id'],

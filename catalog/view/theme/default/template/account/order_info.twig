@@ -53,7 +53,14 @@
         <tbody>
           <tr>
             <td class="text-left">{{ payment_address }}</td>
-            {% if shipping_address %}
+            {% if multiple_address %}
+            <td class="text-left">
+            {% for address in multiple_address %}
+            {{ address }}
+            <hr />
+            {% endfor %}
+            </td>
+            {% elseif shipping_address %}
             <td class="text-left">{{ shipping_address }}</td>
             {% endif %} </tr>
         </tbody>
